@@ -1,0 +1,49 @@
+.button_header {
+	background-color: #444444; /* Black */
+	border: none;
+	color: white;
+	text-align: center;
+	text-decoration: none;
+	display: inline-block;
+	font-size: 20px;
+	width: 33.3%;
+	padding-top: 16px;
+	padding-bottom: 16px;
+	transition: 0.2s;
+}
+.button_simple {
+	background-color: #444444; /* Black */
+	border: none;
+	color: white;
+	text-align: center;
+	text-decoration: none;
+	display: inline-block;
+	font-size: 20px;
+	width: 50%;
+	transition: 0.2s;	
+}
+.input_simple {
+	border-color: "black";
+	width: 200px;
+	border-width: 3px;
+	border-style: solid;
+	border-radius: 10px;
+	height: 20px;
+}
+.enter_simple {
+	background-color: #444444; /* Black */
+	border: none;
+	color: white;
+	text-align: center;
+	text-decoration: none;
+	display: inline-block;
+	font-size: 20px;
+	width: 20%;
+	transition: 0.2s;	
+}
+button:hover {
+	background-color: black;
+}
+td {
+	padding-top: 20px;
+}
