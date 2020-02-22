@@ -58,13 +58,25 @@ def competition(request, name):
 
 def task(request, competition_name, task_name):
     if request.user.is_authenticated:
-        return render(request, "task.html", context={
-            'competition_name': competition_name,
-            'task_name': task_name,
-            'legend': get_info(competition_name, task_name, 'legend'),
-            'input': get_info(competition_name, task_name, 'input'),
-            'output': get_info(competition_name, task_name, 'output')
-        })
+        if request.method == 'GET':
+            return render(request, "task.html", context={
+                'competition_name': competition_name,
+                'task_name': task_name,
+                'legend': get_info(competition_name, task_name, 'legend'),
+                'input': get_info(competition_name, task_name, 'input'),
+                'output': get_info(competition_name, task_name, 'output'),
+                'form': forms.FileForm()
+            })
+        else:
+            form = forms.FileForm(request.POST, request.FILES)
+            if form.is_valid():
+                from os import mkdir, remove, rmdir
+                file = request.FILES['file']
+                this_directory = '../competitions/' + competition_name + '/solutions/' + task_name + '/'
+                with open(this_directory + request.user.username + '.zip', 'wb') as fs:
+                    for chunk in file.chunks():
+                        fs.write(chunk)
+            return HttpResponseRedirect('/task/' + competition_name + '/' + task_name)
     return HttpResponseRedirect('/enter')
 
 
