@@ -7,15 +7,65 @@ from django.contrib.auth import authenticate
 from django.contrib.auth import login, logout
 
 
-def check_admin(request):
-    return request.user.is_authenticated and request.user.username == 'admin'
+########################################################################################################################
+
+
+def competitions_table():
+    from os import listdir, mkdir
+    from os.path import exists
+    if not exists('../competitions'):
+        mkdir('../competitions')
+    comps = listdir('../competitions')
+    line = '<table>\n'
+    for c in comps:
+        if not c.startswith('.'):
+            line += '<tr><td><a href="http://127.0.0.1:8000/competition/' + c + '">' + c + '</td></tr>\n'
+    line += '</table>'
+    return line
+
+
+def tasks_table(competition_name):
+    from os import listdir
+    tasks = listdir('../competitions/' + competition_name + '/tasks')
+    line = '<table>\n'
+    for c in tasks:
+        if not c.startswith('.'):
+            line += '<tr><td><a href="http://127.0.0.1:8000/task/' + competition_name + '/' + c + '">' + c + '</td></tr>\n'
+    line += '</table>'
+    return line
+
+
+def get_info(competition_name, task_name, filename):
+    return '<br />'.join(open('../competitions/' + competition_name + '/tasks/' + task_name + '/' + filename + '.txt').readlines())
+
+
+########################################################################################################################
 
 
 def main(request):
     if request.user.is_authenticated:
-        return render(request, "main.html", context={"name": request.user.username})
+        return render(request, "main.html", context={"competitions": competitions_table()})
     else:
         return HttpResponseRedirect("/enter")
+
+
+def competition(request, name):
+    if request.user.is_authenticated:
+        return render(request, "competition.html", context={"name": name, 'tasks': tasks_table(name)})
+    else:
+        return HttpResponseRedirect('/enter')
+
+
+def task(request, competition_name, task_name):
+    if request.user.is_authenticated:
+        return render(request, "task.html", context={
+            'competition_name': competition_name,
+            'task_name': task_name,
+            'legend': get_info(competition_name, task_name, 'legend'),
+            'input': get_info(competition_name, task_name, 'input'),
+            'output': get_info(competition_name, task_name, 'output')
+        })
+    return HttpResponseRedirect('/enter')
 
 
 def settings(request):

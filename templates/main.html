@@ -14,7 +14,11 @@
 		<div>
 			<button class="button_header" onclick="main()">Главная</button><button class="button_header" onclick="settings()">Настройки</button><button class="button_header" onclick="logout()">Выход</button>
 		</div>
-		MainPage
-        {{ task }}
+        <div>
+            <h1>Доступные соревнования</h1>
+            {% autoescape off %}
+                {{ competitions }}
+            {% endautoescape %}
+        </div>
 	</body>
 </html>

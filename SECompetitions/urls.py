@@ -8,6 +8,8 @@ urlpatterns = [
     path('enter', views.enter),
     path('restore', views.restore),
     path('exit', views.exit),
+    path('competition/<name>', views.competition),
+    path('task/<competition_name>/<task_name>', views.task),
     path('create_user/<username>/<password>', views.create_user),
     path('', views.main)
 ]
