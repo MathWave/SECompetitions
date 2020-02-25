@@ -2,26 +2,26 @@
 <project version="4">
   <component name="ChangeListManager">
     <list default="true" id="df440fb9-1a96-4034-ae0e-83ac9dcfeb0a" name="Default Changelist" comment="">
-      <change afterPath="$PROJECT_DIR$/templates/admin/competitions_settings.html" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/templates/admin/enter.html" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/templates/admin/main.html" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/templates/admin/new_competition.html" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/templates/admin/new_task.html" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/templates/admin/restore.html" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/templates/admin/task_settings.html" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/templates/competitor/settings.html" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/templates/admin/admin.html" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/templates/admin/competition.html" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/templates/admin/task.html" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/SECompetitions/urls.py" beforeDir="false" afterPath="$PROJECT_DIR$/SECompetitions/urls.py" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/contest/forms.py" beforeDir="false" afterPath="$PROJECT_DIR$/contest/forms.py" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/contest/views.py" beforeDir="false" afterPath="$PROJECT_DIR$/contest/views.py" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/db.sqlite3" beforeDir="false" afterPath="$PROJECT_DIR$/db.sqlite3" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/static/css/styles.css" beforeDir="false" afterPath="$PROJECT_DIR$/static/css/styles.css" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/templates/competition.html" beforeDir="false" afterPath="$PROJECT_DIR$/templates/competitor/competition.html" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/templates/enter.html" beforeDir="false" afterPath="$PROJECT_DIR$/templates/competitor/enter.html" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/templates/index.html" beforeDir="false" afterPath="$PROJECT_DIR$/templates/competitor/index.html" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/templates/main.html" beforeDir="false" afterPath="$PROJECT_DIR$/templates/competitor/main.html" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/templates/restore.html" beforeDir="false" afterPath="$PROJECT_DIR$/templates/competitor/restore.html" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/templates/settings.html" beforeDir="false" afterPath="$PROJECT_DIR$/templates/admin/settings.html" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/templates/task.html" beforeDir="false" afterPath="$PROJECT_DIR$/templates/competitor/task.html" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/static/js/scripts.js" beforeDir="false" afterPath="$PROJECT_DIR$/static/js/scripts.js" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/templates/admin/competitions_settings.html" beforeDir="false" afterPath="$PROJECT_DIR$/templates/admin/competitions_settings.html" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/templates/admin/enter.html" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/templates/admin/main.html" beforeDir="false" afterPath="$PROJECT_DIR$/templates/admin/main.html" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/templates/admin/new_competition.html" beforeDir="false" afterPath="$PROJECT_DIR$/templates/admin/new_competition.html" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/templates/admin/new_task.html" beforeDir="false" afterPath="$PROJECT_DIR$/templates/admin/new_task.html" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/templates/admin/restore.html" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/templates/admin/settings.html" beforeDir="false" afterPath="$PROJECT_DIR$/templates/admin/settings.html" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/templates/admin/task_settings.html" beforeDir="false" afterPath="$PROJECT_DIR$/templates/admin/task_settings.html" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/templates/competitor/enter.html" beforeDir="false" afterPath="$PROJECT_DIR$/templates/enter.html" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/templates/competitor/restore.html" beforeDir="false" afterPath="$PROJECT_DIR$/templates/restore.html" afterDir="false" />
     </list>
     <option name="EXCLUDED_CONVERTED_TO_IGNORED" value="true" />
     <option name="SHOW_DIALOG" value="false" />
@@ -70,6 +70,7 @@
       <recent name="$PROJECT_DIR$/templates/admin" />
     </key>
     <key name="MoveFile.RECENT_KEYS">
+      <recent name="$PROJECT_DIR$/templates" />
       <recent name="$PROJECT_DIR$/templates/competitor" />
     </key>
   </component>
@@ -136,6 +137,10 @@
       <workItem from="1582408612897" duration="151000" />
       <workItem from="1582617492661" duration="2443000" />
       <workItem from="1582620078738" duration="119000" />
+      <workItem from="1582620362624" duration="1142000" />
+      <workItem from="1582623341613" duration="7751000" />
+      <workItem from="1582644155618" duration="6107000" />
+      <workItem from="1582654285829" duration="4055000" />
     </task>
     <servers />
   </component>
@@ -154,5 +159,16 @@
         </entry>
       </map>
     </option>
+  </component>
+  <component name="XDebuggerManager">
+    <breakpoint-manager>
+      <breakpoints>
+        <line-breakpoint enabled="true" suspend="THREAD" type="python-line">
+          <url>file://$PROJECT_DIR$/contest/views.py</url>
+          <line>69</line>
+          <option name="timeStamp" value="3" />
+        </line-breakpoint>
+      </breakpoints>
+    </breakpoint-manager>
   </component>
 </project>

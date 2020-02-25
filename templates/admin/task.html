@@ -1,0 +1,51 @@
+<!DOCTYPE html>
+{% load static %}
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>{{task_name}}</title>
+    <link rel="stylesheet" type="text/css" href={% static "css/styles.css" %}>
+    <script type="text/javascript" src={% static "js/scripts.js" %}></script>
+</head>
+<body>
+    <div>
+        <button class="button_header_admin" onclick="main()">Главная</button><button class="button_header_admin" onclick="admin()">Админка</button><button class="button_header_admin" onclick="settings()">Настройки</button><button class="button_header_admin" onclick="logout()">Выход</button>
+    </div>
+    <div style="text-align: center;">
+        <h1>
+            <a href="http://127.0.0.1:8000/competition/{{ competition_name }}">Обратно к соревнованию</a>
+        </h1>
+    </div>
+    <div style="text-align: center;">
+        <h1>
+            {{ task_name }}
+        </h1>
+    </div>
+    <div>
+        <hr>
+        <h2>Легенда</h2>
+        {% autoescape off %}
+            {{ legend }}
+        {% endautoescape %}
+        <hr>
+        <h2>Формат входных данных</h2>
+        {% autoescape off %}
+            {{ input }}
+        {% endautoescape %}
+        <hr>
+        <h2>Формат выходных данных</h2>
+        {% autoescape off %}
+            {{ output }}
+        {% endautoescape %}
+        <hr>
+        <div style="text-align: center;"><h2>Отправить решение</h2></div>
+        <form action="" method="POST" enctype="multipart/form-data">
+            {% csrf_token %}
+            <table>
+                {{ form }}
+            </table>
+            <input type="submit" value="Отправить" class=enter_simple>
+        </form>
+    </div>
+</body>
+</html>

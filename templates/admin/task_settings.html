@@ -9,7 +9,7 @@
 </head>
 <body>
     <div>
-        <button class="button_header" onclick="main()">Главная</button><button class="button_header" onclick="settings()">Настройки</button><button class="button_header" onclick="logout()">Выход</button>
+        <button class="button_header_admin" onclick="main()">Главная</button><button class="button_header_admin" onclick="admin()">Админка</button><button class="button_header_admin" onclick="settings()">Настройки</button><button class="button_header_admin" onclick="logout()">Выход</button>
         <hr>
     </div>
     <div style="text-align: center;">
@@ -19,7 +19,7 @@
                     Легенда
                 </td>
                 <td>
-                    <textarea rows="10" cols="50" disabled>
+                    <textarea rows="10" cols="50" style="resize: none;">
                         {{ legend }}
                     </textarea>
                 </td>
@@ -29,7 +29,7 @@
                     Формат входных данных
                 </td>
                 <td>
-                    <textarea rows="10" cols="50" disabled>
+                    <textarea rows="10" cols="50" style="resize: none;">
                         {{ input }}
                     </textarea>
                 </td>
@@ -39,7 +39,7 @@
                     Формат выходных данных
                 </td>
                 <td>
-                    <textarea rows="10" cols="50" disabled>
+                    <textarea rows="10" cols="50" style="resize: none;">
                         {{ output }}
                     </textarea>
                 </td>
