@@ -44,14 +44,21 @@ def get_info(competition_name, task_name, filename):
 
 def main(request):
     if request.user.is_authenticated:
-        return render(request, "main.html", context={"competitions": competitions_table()})
+        if request.user.is_staff:
+            return render(request, "admin/main.html", context={"competitions": competitions_table()})
+        else:
+            return render(request, "competitor/main.html", context={"competitions": competitions_table()})
     else:
         return HttpResponseRedirect("/enter")
 
 
+def redirect(request):
+    return HttpResponseRedirect('/main')
+
+
 def competition(request, name):
     if request.user.is_authenticated:
-        return render(request, "competition.html", context={"name": name, 'tasks': tasks_table(name)})
+        return render(request, "competitor/competition.html", context={"name": name, 'tasks': tasks_table(name)})
     else:
         return HttpResponseRedirect('/enter')
 
@@ -59,7 +66,7 @@ def competition(request, name):
 def task(request, competition_name, task_name):
     if request.user.is_authenticated:
         if request.method == 'GET':
-            return render(request, "task.html", context={
+            return render(request, "competitor/task.html", context={
                 'competition_name': competition_name,
                 'task_name': task_name,
                 'legend': get_info(competition_name, task_name, 'legend'),
@@ -82,7 +89,7 @@ def task(request, competition_name, task_name):
 
 def settings(request):
     if request.user.is_authenticated:
-        return render(request, "settings.html", context={"name": request.user.username})
+        return render(request, "competitor/settings.html", context={"name": request.user.username})
     else:
         return HttpResponseRedirect("/enter")
 
@@ -91,7 +98,7 @@ def restore(request):
     if request.user.is_authenticated:
         return HttpResponseRedirect("/main")
     else:
-        return render(request, "restore.html")
+        return render(request, "competitor/restore.html")
 
 
 def enter(request):
@@ -109,7 +116,7 @@ def enter(request):
             return HttpResponseRedirect('/enter')
     else:
         loginform = forms.LoginForm()
-        return render(request, "enter.html", context={"form": loginform})
+        return render(request, "competitor/enter.html", context={"form": loginform})
 
 
 def exit(request):

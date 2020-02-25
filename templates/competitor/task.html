@@ -21,29 +21,31 @@
             {{ task_name }}
         </h1>
     </div>
-    <hr>
-    <h2>Легенда</h2>
-    {% autoescape off %}
-        {{ legend }}
-    {% endautoescape %}
-    <hr>
-    <h2>Формат входных данных</h2>
-    {% autoescape off %}
-        {{ input }}
-    {% endautoescape %}
-    <hr>
-    <h2>Формат выходных данных</h2>
-    {% autoescape off %}
-        {{ output }}
-    {% endautoescape %}
-    <hr>
-    <div style="text-align: center;"><h2>Отправить решение</h2></div>
-    <form action="" method="POST" enctype="multipart/form-data">
-        {% csrf_token %}
-        <table>
-            {{ form }}
-        </table>
-        <input type="submit" value="Отправить" class=enter_simple>
-    </form>
+    <div>
+        <hr>
+        <h2>Легенда</h2>
+        {% autoescape off %}
+            {{ legend }}
+        {% endautoescape %}
+        <hr>
+        <h2>Формат входных данных</h2>
+        {% autoescape off %}
+            {{ input }}
+        {% endautoescape %}
+        <hr>
+        <h2>Формат выходных данных</h2>
+        {% autoescape off %}
+            {{ output }}
+        {% endautoescape %}
+        <hr>
+        <div style="text-align: center;"><h2>Отправить решение</h2></div>
+        <form action="" method="POST" enctype="multipart/form-data">
+            {% csrf_token %}
+            <table>
+                {{ form }}
+            </table>
+            <input type="submit" value="Отправить" class=enter_simple>
+        </form>
+    </div>
 </body>
 </html>

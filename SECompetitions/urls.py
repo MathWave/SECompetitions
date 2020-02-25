@@ -1,5 +1,5 @@
 from django.contrib import admin
-from django.urls import path
+from django.urls import path, re_path
 from contest import views
 
 urlpatterns = [
@@ -11,5 +11,5 @@ urlpatterns = [
     path('competition/<name>', views.competition),
     path('task/<competition_name>/<task_name>', views.task),
     path('create_user/<username>/<password>', views.create_user),
-    path('', views.main)
+    re_path('^', views.redirect)
 ]

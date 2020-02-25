@@ -2,11 +2,26 @@
 <project version="4">
   <component name="ChangeListManager">
     <list default="true" id="df440fb9-1a96-4034-ae0e-83ac9dcfeb0a" name="Default Changelist" comment="">
+      <change afterPath="$PROJECT_DIR$/templates/admin/competitions_settings.html" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/templates/admin/enter.html" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/templates/admin/main.html" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/templates/admin/new_competition.html" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/templates/admin/new_task.html" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/templates/admin/restore.html" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/templates/admin/task_settings.html" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/templates/competitor/settings.html" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/contest/forms.py" beforeDir="false" afterPath="$PROJECT_DIR$/contest/forms.py" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/SECompetitions/urls.py" beforeDir="false" afterPath="$PROJECT_DIR$/SECompetitions/urls.py" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/contest/views.py" beforeDir="false" afterPath="$PROJECT_DIR$/contest/views.py" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/db.sqlite3" beforeDir="false" afterPath="$PROJECT_DIR$/db.sqlite3" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/templates/task.html" beforeDir="false" afterPath="$PROJECT_DIR$/templates/task.html" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/static/css/styles.css" beforeDir="false" afterPath="$PROJECT_DIR$/static/css/styles.css" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/templates/competition.html" beforeDir="false" afterPath="$PROJECT_DIR$/templates/competitor/competition.html" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/templates/enter.html" beforeDir="false" afterPath="$PROJECT_DIR$/templates/competitor/enter.html" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/templates/index.html" beforeDir="false" afterPath="$PROJECT_DIR$/templates/competitor/index.html" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/templates/main.html" beforeDir="false" afterPath="$PROJECT_DIR$/templates/competitor/main.html" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/templates/restore.html" beforeDir="false" afterPath="$PROJECT_DIR$/templates/competitor/restore.html" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/templates/settings.html" beforeDir="false" afterPath="$PROJECT_DIR$/templates/admin/settings.html" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/templates/task.html" beforeDir="false" afterPath="$PROJECT_DIR$/templates/competitor/task.html" afterDir="false" />
     </list>
     <option name="EXCLUDED_CONVERTED_TO_IGNORED" value="true" />
     <option name="SHOW_DIALOG" value="false" />
@@ -47,8 +62,16 @@
     <property name="DefaultHtmlFileTemplate" value="HTML File" />
     <property name="SHARE_PROJECT_CONFIGURATION_FILES" value="true" />
     <property name="WebServerToolWindowFactoryState" value="false" />
-    <property name="last_opened_file_path" value="$PROJECT_DIR$" />
+    <property name="last_opened_file_path" value="$PROJECT_DIR$/templates/admin" />
     <property name="settings.editor.selected.configurable" value="project.scopes" />
+  </component>
+  <component name="RecentsManager">
+    <key name="CopyFile.RECENT_KEYS">
+      <recent name="$PROJECT_DIR$/templates/admin" />
+    </key>
+    <key name="MoveFile.RECENT_KEYS">
+      <recent name="$PROJECT_DIR$/templates/competitor" />
+    </key>
   </component>
   <component name="RunDashboard">
     <option name="ruleStates">
@@ -109,7 +132,10 @@
       <workItem from="1582369262691" duration="1124000" />
       <workItem from="1582370698076" duration="8417000" />
       <workItem from="1582381355876" duration="140000" />
-      <workItem from="1582381584254" duration="3733000" />
+      <workItem from="1582381584254" duration="4633000" />
+      <workItem from="1582408612897" duration="151000" />
+      <workItem from="1582617492661" duration="2443000" />
+      <workItem from="1582620078738" duration="119000" />
     </task>
     <servers />
   </component>
