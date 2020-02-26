@@ -38,6 +38,11 @@
             {{ output }}
         {% endautoescape %}
         <hr>
+        <h2>Примеры</h2>
+        {% autoescape off %}
+            {{ samples }}
+        {% endautoescape %}
+        <hr>
         <div style="text-align: center;"><h2>Отправить решение</h2></div>
         <form action="" method="POST" enctype="multipart/form-data">
             {% csrf_token %}

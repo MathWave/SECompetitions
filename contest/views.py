@@ -73,6 +73,27 @@ def admin_task(request, competition_name, task_name):
             context[field] = get_info(competition_name, task_name, field)
         context['tests'] = forms.TestsForm()
         context['samples'] = forms.SamplesForm()
+        if request.method == 'POST':
+            fields = ['input', 'output', 'legend']
+            for field in fields:
+                write_info(competition_name, task_name, field, request.POST[field])
+            folders = [
+                'tests',
+                'samples'
+            ]
+            from zipfile import ZipFile as zf
+            from os import remove, system
+            for folder in folders:
+                file = request.FILES[folder]
+                archive = '../competitions/' + competition_name + '/tasks/' + task_name + '/' + folder + '/input.zip'
+                system('touch ' + archive)
+                with open(archive, 'wb+') as fs:
+                    for chunk in file.chunks():
+                        fs.write(chunk)
+                with zf(archive) as obj:
+                    l = archive.split('/')
+                    obj.extractall('/'.join(l[0:len(l) - 1]))
+                remove(archive)
         return render(request, 'admin/task_settings.html', context=context)
     return HttpResponseRedirect('/enter')
 
@@ -88,6 +109,7 @@ def admin_new_task(request, competition_name):
             mkdir(this_directory)
             mkdir('../competitions/' + competition_name + '/solutions/' + task_name + '/')
             mkdir(this_directory + 'tests')
+            mkdir(this_directory + 'samples')
             system('touch ' + this_directory + 'input.txt')
             system('touch ' + this_directory + 'output.txt')
             system('touch ' + this_directory + 'legend.txt')
@@ -101,6 +123,23 @@ def admin_main(request):
     return HttpResponseRedirect('/enter')
 
 ########################################################################################################################
+
+
+def get_samples(competition_name, task_name):
+    from os import listdir
+    from os.path import isfile, abspath, exists
+    folder = '../competitions/' + competition_name + '/tasks/' + task_name + '/samples/'
+    html = ''
+    count = 1
+    while True:
+        if not exists(folder + "{:02d}".format(count)):
+            break
+        html += '<h3>Пример ' + str(count) + '</h3>\n'
+        html += '<table width="400">\n<tr><td><h4>Вход</h4>'
+        html += open(folder + "{:02d}".format(count), 'r').read() + '</td>\n<td><h4>Выход</h4>\n'
+        html += open(folder + "{:02d}".format(count) + '.a', 'r').read() + '</td>\n</tr>\n</table>'
+        count += 1
+    return html
 
 
 # получить список всех соревнований (потом надо будет сделать фильтр)
@@ -133,6 +172,11 @@ def tasks_table(competition_name):
 # считать информацию из файла с входными выходными данными или легендой
 def get_info(competition_name, task_name, filename):
     return '<br />'.join(open('../competitions/' + competition_name + '/tasks/' + task_name + '/' + filename + '.txt').readlines())
+
+
+def write_info(competition_name, task_name, filename, text):
+    with open('../competitions/' + competition_name + '/tasks/' + task_name + '/' + filename + '.txt', 'w') as fs:
+        fs.write(text)
 
 
 ########################################################################################################################
@@ -171,6 +215,7 @@ def task(request, competition_name, task_name):
                 'legend': get_info(competition_name, task_name, 'legend'),
                 'input': get_info(competition_name, task_name, 'input'),
                 'output': get_info(competition_name, task_name, 'output'),
+                'samples': get_samples(competition_name, task_name),
                 'form': forms.FileForm()
             }
             if request.user.is_staff:

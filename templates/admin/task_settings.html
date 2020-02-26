@@ -13,54 +13,47 @@
         <hr>
     </div>
     <div style="text-align: center;">
-        <table>
-            <tr>
-                <td>
-                    Легенда
-                </td>
-                <td>
-                    <textarea rows="10" cols="50" style="resize: none;">
-                        {{ legend }}
-                    </textarea>
-                </td>
-            </tr>
-            <tr>
-                <td>
-                    Формат входных данных
-                </td>
-                <td>
-                    <textarea rows="10" cols="50" style="resize: none;">
-                        {{ input }}
-                    </textarea>
-                </td>
-            </tr>
-            <tr>
-                <td>
-                    Формат выходных данных
-                </td>
-                <td>
-                    <textarea rows="10" cols="50" style="resize: none;">
-                        {{ output }}
-                    </textarea>
-                </td>
-            </tr>
-            <tr>
-                <td>
-                    Тесты
-                </td>
-                <td>
-                    {{ tests }}
-                </td>
-            </tr>
-            <tr>
-                <td>
-                    Самплы
-                </td>
-                <td>
-                    {{ samples }}
-                </td>
-            </tr>
-        </table>
+        <form action="" method="POST" enctype="multipart/form-data">
+            {% csrf_token %}
+            <table>
+                <tr>
+                    <td>
+                        Легенда
+                    </td>
+                    <td>
+                        <textarea rows="10" cols="50" style="resize: none;" name="legend">{{ legend }}</textarea>
+                    </td>
+                </tr>
+                <tr>
+                    <td>
+                        Формат входных данных
+                    </td>
+                    <td>
+                        <textarea rows="10" cols="50" style="resize: none;" name="input">{{ input }}</textarea>
+                    </td>
+                </tr>
+                <tr>
+                    <td>
+                        Формат выходных данных
+                    </td>
+                    <td>
+                        <textarea rows="10" cols="50" style="resize: none;" name="output">{{ output }}</textarea>
+                    </td>
+                </tr>
+                <tr>
+                    <td>
+                        {{ tests }}
+                    </td>
+                </tr>
+                <tr>
+                    <td>
+                        {{ samples }}
+                    </td>
+                </tr>
+            </table>
+            <hr>
+            <input type="submit" value="Сохранить" class=enter_simple>
+        </form>
     </div>
 </body>
 </html>

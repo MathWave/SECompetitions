@@ -1,7 +1,14 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <project version="4">
   <component name="ChangeListManager">
-    <list default="true" id="df440fb9-1a96-4034-ae0e-83ac9dcfeb0a" name="Default Changelist" comment="" />
+    <list default="true" id="df440fb9-1a96-4034-ae0e-83ac9dcfeb0a" name="Default Changelist" comment="">
+      <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/contest/views.py" beforeDir="false" afterPath="$PROJECT_DIR$/contest/views.py" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/db.sqlite3" beforeDir="false" afterPath="$PROJECT_DIR$/db.sqlite3" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/templates/admin/task.html" beforeDir="false" afterPath="$PROJECT_DIR$/templates/admin/task.html" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/templates/admin/task_settings.html" beforeDir="false" afterPath="$PROJECT_DIR$/templates/admin/task_settings.html" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/templates/competitor/task.html" beforeDir="false" afterPath="$PROJECT_DIR$/templates/competitor/task.html" afterDir="false" />
+    </list>
     <option name="EXCLUDED_CONVERTED_TO_IGNORED" value="true" />
     <option name="SHOW_DIALOG" value="false" />
     <option name="HIGHLIGHT_CONFLICTS" value="true" />
@@ -120,6 +127,8 @@
       <workItem from="1582623341613" duration="7751000" />
       <workItem from="1582644155618" duration="6107000" />
       <workItem from="1582654285829" duration="4278000" />
+      <workItem from="1582690007889" duration="832000" />
+      <workItem from="1582727731129" duration="5294000" />
     </task>
     <servers />
   </component>
@@ -138,16 +147,5 @@
         </entry>
       </map>
     </option>
-  </component>
-  <component name="XDebuggerManager">
-    <breakpoint-manager>
-      <breakpoints>
-        <line-breakpoint enabled="true" suspend="THREAD" type="python-line">
-          <url>file://$PROJECT_DIR$/contest/views.py</url>
-          <line>69</line>
-          <option name="timeStamp" value="3" />
-        </line-breakpoint>
-      </breakpoints>
-    </breakpoint-manager>
   </component>
 </project>
