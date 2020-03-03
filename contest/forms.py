@@ -7,7 +7,7 @@ class LoginForm(forms.Form):
 
 
 class FileForm(forms.Form):
-    file = forms.FileField(widget=forms.FileInput(attrs={'class': 'input_simple'}))
+    file = forms.FileField(widget=forms.FileInput(attrs={'class': 'input_simple'}), required=False)
 
 
 class NewCompetitionForm(forms.Form):
@@ -19,8 +19,8 @@ class NewTaskForm(forms.Form):
 
 
 class TestsForm(forms.Form):
-    tests = forms.FileField(widget=forms.FileInput())
+    tests = forms.FileField(widget=forms.FileInput(), required=False)
 
 
 class SamplesForm(forms.Form):
-    samples = forms.FileField(widget=forms.FileInput())
+    samples = forms.FileField(widget=forms.FileInput(), required=False)

@@ -44,10 +44,20 @@
                     <td>
                         {{ tests }}
                     </td>
+                    <td>
+                        {% if tests_uploaded %}
+                            <h3><span style="color: red; ">Тесты загружены</span></h3>
+                        {% endif %}
+                    </td>
                 </tr>
                 <tr>
                     <td>
                         {{ samples }}
+                    </td>
+                    <td>
+                        {% if samples_uploaded %}
+                            <h3><span style="color: red; ">Самплы загружены</span></h3>
+                        {% endif %}
                     </td>
                 </tr>
             </table>

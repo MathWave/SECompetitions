@@ -51,7 +51,7 @@
 	text-decoration: none;
 	display: inline-block;
 	font-size: 20px;
-	width: 20%;
+	width: 23%;
 	transition: 0.2s;	
 }
 button:hover {
@@ -63,4 +63,7 @@ td {
 div {
 	padding-left: 10%;
 	padding-right: 10%;
+}
+a {
+	color: black;
 }

@@ -71,6 +71,15 @@ def admin_task(request, competition_name, task_name):
         context = {}
         for field in fields:
             context[field] = get_info(competition_name, task_name, field)
+        from os import listdir
+        if len(listdir('../competitions/' + competition_name + '/tasks/' + task_name + '/tests')) > 1:
+            context['tests_uploaded'] = True
+        else:
+            context['tests_uploaded'] = False
+        if len(listdir('../competitions/' + competition_name + '/tasks/' + task_name + '/samples')) > 1:
+            context['samples_uploaded'] = True
+        else:
+            context['samples_uploaded'] = False
         context['tests'] = forms.TestsForm()
         context['samples'] = forms.SamplesForm()
         if request.method == 'POST':
@@ -84,16 +93,18 @@ def admin_task(request, competition_name, task_name):
             from zipfile import ZipFile as zf
             from os import remove, system
             for folder in folders:
-                file = request.FILES[folder]
-                archive = '../competitions/' + competition_name + '/tasks/' + task_name + '/' + folder + '/input.zip'
-                system('touch ' + archive)
-                with open(archive, 'wb+') as fs:
-                    for chunk in file.chunks():
-                        fs.write(chunk)
-                with zf(archive) as obj:
-                    l = archive.split('/')
-                    obj.extractall('/'.join(l[0:len(l) - 1]))
-                remove(archive)
+                if folder in request.FILES.keys():
+                    file = request.FILES[folder]
+                    archive = '../competitions/' + competition_name + '/tasks/' + task_name + '/' + folder + '/input.zip'
+                    system('touch ' + archive)
+                    with open(archive, 'wb+') as fs:
+                        for chunk in file.chunks():
+                            fs.write(chunk)
+                    with zf(archive) as obj:
+                        l = archive.split('/')
+                        obj.extractall('/'.join(l[0:len(l) - 1]))
+                    remove(archive)
+            return HttpResponseRedirect('/admin/task/' + competition_name + '/' + task_name)
         return render(request, 'admin/task_settings.html', context=context)
     return HttpResponseRedirect('/enter')
 
