@@ -5,6 +5,22 @@ from contest import forms
 from django.contrib.auth.models import User
 from django.contrib.auth import authenticate
 from django.contrib.auth import login, logout
+from sqlite3 import connect
+
+########################################################################################################################
+
+def current_index():
+    connector = connect('db.sqlite3')
+    cursor = connector.cursor()
+    cursor.execute('''
+                   SELECT * FROM Solutions
+                   ''')
+    amount = len(cursor.fetchall())
+    cursor.close()
+    connector.close()
+    return amount
+
+
 
 ########################################################################################################################
 
@@ -239,9 +255,16 @@ def task(request, competition_name, task_name):
                 from os import mkdir, remove, rmdir
                 file = request.FILES['file']
                 this_directory = '../competitions/' + competition_name + '/solutions/' + task_name + '/'
-                with open(this_directory + request.user.username + '.zip', 'wb') as fs:
+                index = current_index()
+                with open(this_directory + str(index) + '.zip', 'wb') as fs:
                     for chunk in file.chunks():
                         fs.write(chunk)
+                connector = connect('db.sqlite3')
+                cursor = connector.cursor()
+                cursor.execute("INSERT INTO Solutions VALUES (?, ?, ?, ?)", (index, competition_name, task_name, request.user.username))
+                connector.commit()
+                cursor.close()
+                connector.close()
             return HttpResponseRedirect('/task/' + competition_name + '/' + task_name)
     return HttpResponseRedirect('/enter')
 
