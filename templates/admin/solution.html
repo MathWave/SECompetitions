@@ -1,0 +1,63 @@
+<!DOCTYPE html>
+{% load static %}
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>{{ name }}</title>
+    <link rel="stylesheet" type="text/css" href={% static "css/styles.css" %}>
+    <script type="text/javascript" src={% static "js/scripts.js" %}></script>
+    <style>
+        td {
+            padding-left: 15px;
+        }
+    </style>
+</head>
+<body>
+    <div>
+        <button class="button_header_admin" onclick="main()">Главная</button><button class="button_header_admin" onclick="admin()">Админка</button><button class="button_header_admin" onclick="settings()">Настройки</button><button class="button_header_admin" onclick="logout()">Выход</button>
+        <hr>
+    </div>
+    <div>
+        <h3>
+            <table border="1px solid black">
+                <tr>
+                    <td>
+                        Соревнование:
+                    </td>
+                    <td>
+                        {{ competition }}
+                    </td>
+                </tr>
+                <tr>
+                    <td>
+                        Таск:
+                    </td>
+                    <td>
+                        {{ task }}
+                    </td>
+                </tr>
+                <tr>
+                    <td>
+                        Студент:
+                    </td>
+                    <td>
+                        {{ username }}
+                    </td>
+                </tr>
+                <tr>
+                    <td>
+                        Id посылки:
+                    </td>
+                    <td>
+                        {{ id }}
+                    </td>
+                </tr>
+            </table>
+        </h3>
+        <h2>Files</h2>
+    </div>
+    {% autoescape off %}
+    {{ files }}
+    {% endautoescape %}
+</body>
+</html>

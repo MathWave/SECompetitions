@@ -6,19 +6,34 @@ from django.contrib.auth.models import User
 from django.contrib.auth import authenticate
 from django.contrib.auth import login, logout
 from sqlite3 import connect
+from zipfile import ZipFile as zf
+from urllib.request import quote
+
 
 ########################################################################################################################
 
 def current_index():
     connector = connect('db.sqlite3')
     cursor = connector.cursor()
-    cursor.execute('''
-                   SELECT * FROM Solutions
-                   ''')
+    cursor.execute('SELECT * FROM Solutions')
     amount = len(cursor.fetchall())
     cursor.close()
     connector.close()
     return amount
+
+
+def solution_info(id):
+    connector = connect('db.sqlite3')
+    cursor = connector.cursor()
+    cursor.execute('SELECT * FROM Solutions WHERE id = ?', (id,))
+    res = cursor.fetchone()
+    cursor.close()
+    connector.close()
+    return {
+        'competition': res[1],
+        'task': res[2],
+        'username': res[3]
+    }
 
 
 
@@ -61,7 +76,77 @@ def admin_tasks_table(competition_name):
     line += '</table>'
     return line
 
+
+def solutions_table(competition_name):
+    connector = connect('db.sqlite3')
+    cursor = connector.cursor()
+    cursor.execute('SELECT * FROM Solutions WHERE competition = ?', (competition_name,))
+    solution_list = cursor.fetchall()
+    cursor.close()
+    connector.close()
+    table = '<tr><td><b>Id</b></td><td><b>Таск</b></td><td><b>Пользователь</b></td></tr>'
+    for solution in solution_list:
+        table += '<tr>\n'
+        table += "<td><a href='http://127.0.0.1:8000/admin/solution/" + str(solution[0]) + "'>" + \
+                 str(solution[0]) + '</a>'
+        for i in 2, 3:
+            table += '<td>' + str(solution[i]) + '</td>\n'
+        table += '</tr>\n'
+    return table
+
 ########################################################################################################################
+
+
+def admin_show_file(request, id):
+    if request.user.is_authenticated and request.user.is_staff:
+        info = solution_info(id)
+        rootdir = '../competitions/' + info['competition'] + '/solutions/' + info['task'] + '/' + id + '/' + \
+                  request.GET.get('file', '')
+        file = open(rootdir, 'r').read().replace('\n', '<br>').replace('    ', '&emsp;&emsp;')
+        return render(request, 'admin/show_file.html', context={'competition': info['competition'],
+                                                                'task': info['task'],
+                                                                'username': info['username'],
+                                                                'id': id,
+                                                                'filename': rootdir.split('/')[-1],
+                                                                'text': file
+                                                               })
+    return HttpResponseRedirect('/enter')
+
+
+def admin_solution(request, id):
+    if request.user.is_authenticated and request.user.is_staff:
+        info = solution_info(id)
+        files = ''
+        from os import listdir
+        from os.path import isfile, abspath, isdir
+        rootdir = '../competitions/' + info['competition'] + '/solutions/' + info['task'] + '/' + id + '/' + \
+                  request.GET.get('folder', '')
+        for file in listdir(rootdir):
+            files += '<div><img src="'
+            a = abspath(file)
+            if isfile(rootdir + '/' + file):
+                files += 'http://icons.iconarchive.com/icons/icons8/windows-8/16/Very-Basic-Document-icon.png'
+                f = '/'.join(rootdir.split('/')[6:])
+                files += '">    <a href=http://127.0.0.1:8000/admin/show_file/' + id + '?file=' + \
+                         quote('/'.join(rootdir.split('/')[6:]) + '/' + file, safe='') + '>' + file + '</div>\n'
+            else:
+                files += 'http://icons.iconarchive.com/icons/icons8/ios7/16/Very-Basic-Opened-Folder-icon.png'
+                files += '">    <a href=http://127.0.0.1:8000/admin/solution/' + id + '?folder=' + \
+                         quote('/'.join(rootdir.split('/')[6:]) + '/' + file, safe='') + '>' + file + '</div>\n'
+        return render(request, 'admin/solution.html', context={'competition': info['competition'],
+                                                               'task': info['task'],
+                                                               'username': info['username'],
+                                                               'id': id,
+                                                               'files': files
+                                                      })
+    return HttpResponseRedirect('/enter')
+
+
+def admin_solutions(request, competition_name):
+    if request.user.is_authenticated and request.user.is_staff:
+        return render(request, "admin/solutions.html", context={'name': competition_name,
+                                                                'solutions': solutions_table(competition_name)})
+    return HttpResponseRedirect('/enter')
 
 
 def admin_new_competition(request):
@@ -76,7 +161,9 @@ def admin_new_competition(request):
 
 def admin_competition(request, name):
     if request.user.is_authenticated and request.user.is_staff:
-        return render(request, "admin/competitions_settings.html", context={"name": name, 'tasks': admin_tasks_table(name)})
+        return render(request, "admin/competitions_settings.html", context={"name": name,
+                                                                            'tasks': admin_tasks_table(name),
+                                                                            'solutions': solutions_table(name)})
     else:
         return HttpResponseRedirect('/enter')
 
@@ -106,7 +193,6 @@ def admin_task(request, competition_name, task_name):
                 'tests',
                 'samples'
             ]
-            from zipfile import ZipFile as zf
             from os import remove, system
             for folder in folders:
                 if folder in request.FILES.keys():
@@ -259,6 +345,10 @@ def task(request, competition_name, task_name):
                 with open(this_directory + str(index) + '.zip', 'wb') as fs:
                     for chunk in file.chunks():
                         fs.write(chunk)
+                from os import remove
+                with zf(this_directory + str(index) + '.zip') as obj:
+                    obj.extractall(this_directory + str(index) + '/')
+                remove(this_directory + str(index) + '.zip')
                 connector = connect('db.sqlite3')
                 cursor = connector.cursor()
                 cursor.execute("INSERT INTO Solutions VALUES (?, ?, ?, ?)", (index, competition_name, task_name, request.user.username))

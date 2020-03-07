@@ -19,3 +19,6 @@ function new_competition() {
 function new_task(competition_name) {
 	window.location.href = 'http://127.0.0.1:8000/admin/new_task/' + competition_name
 }
+function solutions(competition_name) {
+	window.location.href = 'http://127.0.0.1:8000/admin/solutions/' + competition_name
+}

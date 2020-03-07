@@ -16,6 +16,9 @@ urlpatterns = [
     path('admin/task/<competition_name>/<task_name>', views.admin_task),
     path('admin/new_task/<competition_name>', views.admin_new_task),
     path('admin/main', views.admin_main),
+    path('admin/solutions/<competition_name>', views.admin_solutions),
+    path('admin/solution/<id>', views.admin_solution),
+    path('admin/show_file/<id>', views.admin_show_file),
 
     path('create_user/<username>/<password>', views.create_user),
     re_path('^', views.redirect)
