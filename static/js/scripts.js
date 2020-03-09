@@ -22,3 +22,11 @@ function new_task(competition_name) {
 function solutions(competition_name) {
 	window.location.href = 'http://127.0.0.1:8000/admin/solutions/' + competition_name
 }
+function delete_solution(competition_name) {
+	let del = confirm("Точно удаляем?");
+	if (del) window.location.href = 'http://127.0.0.1:8000/admin/delete_competition/' + competition_name
+}
+function delete_task(competition_name, task_name) {
+	let del = confirm("Точно удаляем?");
+	if (del) window.location.href = 'http://127.0.0.1:8000/admin/delete_task/' + competition_name + '/' + task_name
+}

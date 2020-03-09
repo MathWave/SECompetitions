@@ -16,10 +16,13 @@ def current_index():
     connector = connect('db.sqlite3')
     cursor = connector.cursor()
     cursor.execute('SELECT * FROM Solutions')
-    amount = len(cursor.fetchall())
+    all = cursor.fetchall()
+    number = 0
+    if len(all) != 0:
+        number = cursor.fetchall()[-1][0] + 1
     cursor.close()
     connector.close()
-    return amount
+    return number
 
 
 def solution_info(id):
@@ -72,7 +75,8 @@ def admin_tasks_table(competition_name):
     line = '<table>\n'
     for c in tasks:
         if not c.startswith('.'):
-            line += '<tr><td><a href="http://127.0.0.1:8000/admin/task/' + competition_name + '/' + c + '">' + c + '</td></tr>\n'
+            line += '<tr><td><a href="http://127.0.0.1:8000/admin/task/' + competition_name + '/' + c + '">' + c + \
+                    '</td></tr>\n'
     line += '</table>'
     return line
 
@@ -95,6 +99,35 @@ def solutions_table(competition_name):
     return table
 
 ########################################################################################################################
+
+
+def admin_delete_task(request, competition_name, task_name):
+    if request.user.is_authenticated and request.user.is_staff:
+        connector = connect('db.sqlite3')
+        cursor = connector.cursor()
+        cursor.execute('DELETE FROM Solutions WHERE competition = ? AND task = ?', (competition_name, task_name, ))
+        connector.commit()
+        cursor.close()
+        connector.close()
+        from os import system
+        system('rm -r ../competitions/' + competition_name + '/tasks/' + task_name)
+        system('rm -r ../competitions/' + competition_name + '/solutions/' + task_name)
+        return HttpResponseRedirect('/admin/main')
+    return HttpResponseRedirect('/enter')
+
+
+def admin_delete_competition(request, competition_name):
+    if request.user.is_authenticated and request.user.is_staff:
+        connector = connect('db.sqlite3')
+        cursor = connector.cursor()
+        cursor.execute('DELETE FROM Solutions WHERE competition = ?', (competition_name, ))
+        connector.commit()
+        cursor.close()
+        connector.close()
+        from os import system
+        system('rm -r ../competitions/' + competition_name)
+        return HttpResponseRedirect('/admin/main')
+    return HttpResponseRedirect('/enter')
 
 
 def admin_show_file(request, id):
@@ -174,7 +207,10 @@ def admin_competition(request, name):
 def admin_task(request, competition_name, task_name):
     if request.user.is_authenticated and request.user.is_staff:
         fields = ['legend', 'input', 'output']
-        context = {}
+        context = {
+            'competition': competition_name,
+            'task': task_name
+        }
         for field in fields:
             context[field] = get_info(competition_name, task_name, field)
         from os import listdir
@@ -200,7 +236,8 @@ def admin_task(request, competition_name, task_name):
             for folder in folders:
                 if folder in request.FILES.keys():
                     file = request.FILES[folder]
-                    archive = '../competitions/' + competition_name + '/tasks/' + task_name + '/' + folder + '/input.zip'
+                    archive = '../competitions/' + competition_name + '/tasks/' + task_name + '/' + folder + \
+                              '/input.zip'
                     system('touch ' + archive)
                     with open(archive, 'wb+') as fs:
                         for chunk in file.chunks():
@@ -217,7 +254,8 @@ def admin_task(request, competition_name, task_name):
 def admin_new_task(request, competition_name):
     if request.user.is_authenticated and request.user.is_staff:
         if request.method == 'GET':
-            return render(request, 'admin/new_task.html', context={'form': forms.NewTaskForm(), 'name': competition_name})
+            return render(request, 'admin/new_task.html', context={'form': forms.NewTaskForm(),
+                                                                   'name': competition_name})
         else:
             from os import mkdir, system
             task_name = request.POST['name']
@@ -264,7 +302,7 @@ def competitions_table():
     from os.path import exists
     if not exists('../competitions'):
         mkdir('../competitions')
-    comps = listdir('../competitions')
+    comps = sorted(listdir('../competitions'))
     line = '<table>\n'
     for c in comps:
         if not c.startswith('.'):
@@ -276,18 +314,20 @@ def competitions_table():
 # получить таблицу с заданиями из соревнования competition_name
 def tasks_table(competition_name):
     from os import listdir
-    tasks = listdir('../competitions/' + competition_name + '/tasks')
+    tasks = sorted(listdir('../competitions/' + competition_name + '/tasks'))
     line = '<table>\n'
     for c in tasks:
         if not c.startswith('.'):
-            line += '<tr><td><a href="http://127.0.0.1:8000/task/' + competition_name + '/' + c + '">' + c + '</td></tr>\n'
+            line += '<tr><td><a href="http://127.0.0.1:8000/task/' + competition_name + '/' + c + '">' + c + \
+                    '</td></tr>\n'
     line += '</table>'
     return line
 
 
 # считать информацию из файла с входными выходными данными или легендой
 def get_info(competition_name, task_name, filename):
-    return '<br />'.join(open('../competitions/' + competition_name + '/tasks/' + task_name + '/' + filename + '.txt').readlines())
+    return '<br />'.join(open('../competitions/' + competition_name + '/tasks/' + task_name + '/' + filename + '.txt')
+                         .readlines())
 
 
 def write_info(competition_name, task_name, filename, text):
@@ -354,7 +394,10 @@ def task(request, competition_name, task_name):
                 remove(this_directory + str(index) + '.zip')
                 connector = connect('db.sqlite3')
                 cursor = connector.cursor()
-                cursor.execute("INSERT INTO Solutions VALUES (?, ?, ?, ?)", (index, competition_name, task_name, request.user.username))
+                cursor.execute("INSERT INTO Solutions VALUES (?, ?, ?, ?)", (index,
+                                                                             competition_name,
+                                                                             task_name,
+                                                                             request.user.username))
                 connector.commit()
                 cursor.close()
                 connector.close()
