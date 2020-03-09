@@ -102,7 +102,7 @@ def admin_show_file(request, id):
         info = solution_info(id)
         rootdir = '../competitions/' + info['competition'] + '/solutions/' + info['task'] + '/' + id + '/' + \
                   request.GET.get('file', '')
-        file = open(rootdir, 'r').read().replace('\n', '<br>').replace('    ', '&emsp;&emsp;')
+        file = open(rootdir, 'r').read()
         return render(request, 'admin/show_file.html', context={'competition': info['competition'],
                                                                 'task': info['task'],
                                                                 'username': info['username'],
@@ -115,13 +115,16 @@ def admin_show_file(request, id):
 
 def admin_solution(request, id):
     if request.user.is_authenticated and request.user.is_staff:
+        folder = request.GET.get('folder', '')
+        if '..' in folder:
+            return HttpResponseRedirect('/enter')
         info = solution_info(id)
         files = ''
         from os import listdir
         from os.path import isfile, abspath, isdir
         rootdir = '../competitions/' + info['competition'] + '/solutions/' + info['task'] + '/' + id + '/' + \
                   request.GET.get('folder', '')
-        for file in listdir(rootdir):
+        for file in sorted(listdir(rootdir)):
             files += '<div><img src="'
             a = abspath(file)
             if isfile(rootdir + '/' + file):

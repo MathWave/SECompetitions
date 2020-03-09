@@ -2,16 +2,10 @@
 <project version="4">
   <component name="ChangeListManager">
     <list default="true" id="df440fb9-1a96-4034-ae0e-83ac9dcfeb0a" name="Default Changelist" comment="">
-      <change afterPath="$PROJECT_DIR$/templates/admin/show_file.html" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/templates/admin/solution.html" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/templates/admin/solutions.html" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/SECompetitions/urls.py" beforeDir="false" afterPath="$PROJECT_DIR$/SECompetitions/urls.py" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/contest/views.py" beforeDir="false" afterPath="$PROJECT_DIR$/contest/views.py" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/db.sqlite3" beforeDir="false" afterPath="$PROJECT_DIR$/db.sqlite3" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/static/css/styles.css" beforeDir="false" afterPath="$PROJECT_DIR$/static/css/styles.css" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/static/js/scripts.js" beforeDir="false" afterPath="$PROJECT_DIR$/static/js/scripts.js" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/templates/admin/competitions_settings.html" beforeDir="false" afterPath="$PROJECT_DIR$/templates/admin/competitions_settings.html" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/templates/admin/show_file.html" beforeDir="false" afterPath="$PROJECT_DIR$/templates/admin/show_file.html" afterDir="false" />
     </list>
     <option name="EXCLUDED_CONVERTED_TO_IGNORED" value="true" />
     <option name="SHOW_DIALOG" value="false" />
@@ -144,7 +138,9 @@
       <workItem from="1583443163325" duration="31000" />
       <workItem from="1583519301280" duration="9884000" />
       <workItem from="1583565992561" duration="16455000" />
-      <workItem from="1583594601101" duration="4692000" />
+      <workItem from="1583594601101" duration="5271000" />
+      <workItem from="1583612084920" duration="1073000" />
+      <workItem from="1583740512906" duration="1553000" />
     </task>
     <task id="LOCAL-00001" summary="Отправка условий контеста происходит через формы">
       <created>1582733624850</created>
@@ -189,13 +185,8 @@
       <breakpoints>
         <line-breakpoint enabled="true" suspend="THREAD" type="python-line">
           <url>file://$PROJECT_DIR$/contest/views.py</url>
-          <line>102</line>
-          <option name="timeStamp" value="14" />
-        </line-breakpoint>
-        <line-breakpoint enabled="true" suspend="THREAD" type="python-line">
-          <url>file://$PROJECT_DIR$/contest/views.py</url>
-          <line>106</line>
-          <option name="timeStamp" value="16" />
+          <line>118</line>
+          <option name="timeStamp" value="1" />
         </line-breakpoint>
       </breakpoints>
     </breakpoint-manager>
