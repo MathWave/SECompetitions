@@ -21,6 +21,7 @@ urlpatterns = [
     path('admin/show_file/<id>', views.admin_show_file),
     path('admin/delete_competition/<competition_name>', views.admin_delete_competition),
     path('admin/delete_task/<competition_name>/<task_name>', views.admin_delete_task),
+    path('admin/remove_tests/<competition_name>/<task_name>', views.admin_remove_tests),
 
     path('create_user/<username>/<password>', views.create_user),
     re_path('^', views.redirect)

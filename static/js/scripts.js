@@ -30,3 +30,7 @@ function delete_task(competition_name, task_name) {
 	let del = confirm("Точно удаляем?");
 	if (del) window.location.href = 'http://127.0.0.1:8000/admin/delete_task/' + competition_name + '/' + task_name
 }
+function remove_tests(competition_name, task_name) {
+	let del = confirm("Точно удаляем?");
+	if (del) window.location.href = 'http://127.0.0.1:8000/admin/remove_tests/' + competition_name + '/' + task_name
+}

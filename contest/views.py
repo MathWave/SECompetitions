@@ -12,6 +12,17 @@ from urllib.request import quote
 
 ########################################################################################################################
 
+def check_login(request):
+    if not request.user.is_authenticated:
+        return HttpResponseRedirect('/enter')
+
+
+def check_admin(request):
+    check_login(request)
+    if not request.user.is_staff:
+        return HttpResponseRedirect('/enter')
+
+
 def current_index():
     connector = connect('db.sqlite3')
     cursor = connector.cursor()
@@ -89,7 +100,7 @@ def solutions_table(competition_name):
     cursor.close()
     connector.close()
     table = '<tr><td><b>Id</b></td><td><b>Таск</b></td><td><b>Пользователь</b></td></tr>'
-    for solution in solution_list:
+    for solution in reversed(solution_list):
         table += '<tr>\n'
         table += "<td><a href='http://127.0.0.1:8000/admin/solution/" + str(solution[0]) + "'>" + \
                  str(solution[0]) + '</a>'
@@ -102,198 +113,166 @@ def solutions_table(competition_name):
 
 
 def admin_delete_task(request, competition_name, task_name):
-    if request.user.is_authenticated and request.user.is_staff:
-        connector = connect('db.sqlite3')
-        cursor = connector.cursor()
-        cursor.execute('DELETE FROM Solutions WHERE competition = ? AND task = ?', (competition_name, task_name, ))
-        connector.commit()
-        cursor.close()
-        connector.close()
-        from os import system
-        system('rm -r ../competitions/' + competition_name + '/tasks/' + task_name)
-        system('rm -r ../competitions/' + competition_name + '/solutions/' + task_name)
-        return HttpResponseRedirect('/admin/main')
-    return HttpResponseRedirect('/enter')
+    check_admin(request)
+    connector = connect('db.sqlite3')
+    cursor = connector.cursor()
+    cursor.execute('DELETE FROM Solutions WHERE competition = ? AND task = ?', (competition_name, task_name, ))
+    connector.commit()
+    cursor.close()
+    connector.close()
+    from os import system
+    system('rm -r ../competitions/' + competition_name + '/tasks/' + task_name)
+    system('rm -r ../competitions/' + competition_name + '/solutions/' + task_name)
+    return HttpResponseRedirect('/admin/competition/' + competition_name)
 
 
 def admin_delete_competition(request, competition_name):
-    if request.user.is_authenticated and request.user.is_staff:
-        connector = connect('db.sqlite3')
-        cursor = connector.cursor()
-        cursor.execute('DELETE FROM Solutions WHERE competition = ?', (competition_name, ))
-        connector.commit()
-        cursor.close()
-        connector.close()
-        from os import system
-        system('rm -r ../competitions/' + competition_name)
-        return HttpResponseRedirect('/admin/main')
-    return HttpResponseRedirect('/enter')
+    check_admin(request)
+    connector = connect('db.sqlite3')
+    cursor = connector.cursor()
+    cursor.execute('DELETE FROM Solutions WHERE competition = ?', (competition_name, ))
+    connector.commit()
+    cursor.close()
+    connector.close()
+    from os import system
+    system('rm -r ../competitions/' + competition_name)
+    return HttpResponseRedirect('/admin/main')
+
+
+def admin_remove_tests(request, competition_name, task_name):
+    check_admin(request)
+    from os import system, mkdir
+    system('rm -r ../competitions/' + competition_name + '/tasks/' + task_name + '/tests')
+    mkdir('../competitions/' + competition_name + '/tasks/' + task_name + '/tests')
+    return HttpResponseRedirect('/admin/task/' + competition_name + '/' + task_name)
 
 
 def admin_show_file(request, id):
-    if request.user.is_authenticated and request.user.is_staff:
-        info = solution_info(id)
-        rootdir = '../competitions/' + info['competition'] + '/solutions/' + info['task'] + '/' + id + '/' + \
-                  request.GET.get('file', '')
-        file = open(rootdir, 'r').read()
-        return render(request, 'admin/show_file.html', context={'competition': info['competition'],
-                                                                'task': info['task'],
-                                                                'username': info['username'],
-                                                                'id': id,
-                                                                'filename': rootdir.split('/')[-1],
-                                                                'text': file
-                                                               })
-    return HttpResponseRedirect('/enter')
+    check_admin(request)
+    info = solution_info(id)
+    rootdir = '../competitions/' + info['competition'] + '/solutions/' + info['task'] + '/' + id + '/' + \
+              request.GET.get('file', '')
+    file = open(rootdir, 'r').read()
+    return render(request, 'admin/show_file.html', context={'competition': info['competition'],
+                                                            'task': info['task'],
+                                                            'username': info['username'],
+                                                            'id': id,
+                                                            'filename': rootdir.split('/')[-1],
+                                                            'text': file
+                                                           })
 
 
 def admin_solution(request, id):
-    if request.user.is_authenticated and request.user.is_staff:
-        folder = request.GET.get('folder', '')
-        if '..' in folder:
-            return HttpResponseRedirect('/enter')
-        info = solution_info(id)
-        files = ''
-        from os import listdir
-        from os.path import isfile, abspath, isdir
-        rootdir = '../competitions/' + info['competition'] + '/solutions/' + info['task'] + '/' + id + '/' + \
-                  request.GET.get('folder', '')
-        for file in sorted(listdir(rootdir)):
-            files += '<div><img src="'
-            a = abspath(file)
-            if isfile(rootdir + '/' + file):
-                files += 'http://icons.iconarchive.com/icons/icons8/windows-8/16/Very-Basic-Document-icon.png'
-                f = '/'.join(rootdir.split('/')[6:])
-                files += '">    <a href=http://127.0.0.1:8000/admin/show_file/' + id + '?file=' + \
-                         quote('/'.join(rootdir.split('/')[6:]) + '/' + file, safe='') + '>' + file + '</div>\n'
-            else:
-                files += 'http://icons.iconarchive.com/icons/icons8/ios7/16/Very-Basic-Opened-Folder-icon.png'
-                files += '">    <a href=http://127.0.0.1:8000/admin/solution/' + id + '?folder=' + \
-                         quote('/'.join(rootdir.split('/')[6:]) + '/' + file, safe='') + '>' + file + '</div>\n'
-        return render(request, 'admin/solution.html', context={'competition': info['competition'],
-                                                               'task': info['task'],
-                                                               'username': info['username'],
-                                                               'id': id,
-                                                               'files': files
-                                                      })
-    return HttpResponseRedirect('/enter')
+    check_admin(request)
+    folder = request.GET.get('folder', '')
+    if '..' in folder:
+        return HttpResponseRedirect('/enter')
+    info = solution_info(id)
+    files = ''
+    from os import listdir
+    from os.path import isfile, abspath, isdir
+    rootdir = '../competitions/' + info['competition'] + '/solutions/' + info['task'] + '/' + id + '/' + \
+              request.GET.get('folder', '')
+    for file in sorted(listdir(rootdir)):
+        files += '<div><img src="'
+        a = abspath(file)
+        if isfile(rootdir + '/' + file):
+            files += 'http://icons.iconarchive.com/icons/icons8/windows-8/16/Very-Basic-Document-icon.png'
+            f = '/'.join(rootdir.split('/')[6:])
+            files += '">    <a href=http://127.0.0.1:8000/admin/show_file/' + id + '?file=' + \
+                     quote('/'.join(rootdir.split('/')[6:]) + '/' + file, safe='') + '>' + file + '</div>\n'
+        else:
+            files += 'http://icons.iconarchive.com/icons/icons8/ios7/16/Very-Basic-Opened-Folder-icon.png'
+            files += '">    <a href=http://127.0.0.1:8000/admin/solution/' + id + '?folder=' + \
+                     quote('/'.join(rootdir.split('/')[6:]) + '/' + file, safe='') + '>' + file + '</div>\n'
+    return render(request, 'admin/solution.html', context={'competition': info['competition'],
+                                                           'task': info['task'],
+                                                           'username': info['username'],
+                                                           'id': id,
+                                                           'files': files
+                                                  })
 
 
 def admin_solutions(request, competition_name):
-    if request.user.is_authenticated and request.user.is_staff:
-        return render(request, "admin/solutions.html", context={'name': competition_name,
-                                                                'solutions': solutions_table(competition_name)})
-    return HttpResponseRedirect('/enter')
+    check_admin(request)
+    return render(request, "admin/solutions.html", context={'name': competition_name,
+                                                            'solutions': solutions_table(competition_name)})
 
 
 def admin_new_competition(request):
-    if request.user.is_authenticated and request.user.is_staff:
-        if request.method == 'GET':
-            return render(request, "admin/new_competition.html", context={"form": forms.NewCompetitionForm()})
-        else:
-            admin_create_competition_template(request.POST.get('name'))
-            return HttpResponseRedirect('/admin/main')
-    return HttpResponseRedirect('/enter')
+    check_admin(request)
+    if request.method == 'GET':
+        return render(request, "admin/new_competition.html", context={"form": forms.NewCompetitionForm()})
+    else:
+        admin_create_competition_template(request.POST.get('name'))
+        return HttpResponseRedirect('/admin/competition/' + request.POST.get('name'))
 
 
 def admin_competition(request, name):
-    if request.user.is_authenticated and request.user.is_staff:
-        return render(request, "admin/competitions_settings.html", context={"name": name,
-                                                                            'tasks': admin_tasks_table(name),
-                                                                            'solutions': solutions_table(name)})
-    else:
-        return HttpResponseRedirect('/enter')
+    check_admin(request)
+    return render(request, "admin/competitions_settings.html", context={"name": name,
+                                                                        'tasks': admin_tasks_table(name),
+                                                                        'solutions': solutions_table(name)})
 
 
 def admin_task(request, competition_name, task_name):
-    if request.user.is_authenticated and request.user.is_staff:
-        fields = ['legend', 'input', 'output']
-        context = {
-            'competition': competition_name,
-            'task': task_name
-        }
+    check_admin(request)
+    fields = ['legend', 'input', 'output', 'specifications']
+    context = {
+        'competition': competition_name,
+        'task': task_name
+    }
+    for field in fields:
+        context[field] = get_info(competition_name, task_name, field)
+    from os import listdir
+    if len(listdir('../competitions/' + competition_name + '/tasks/' + task_name + '/tests')) != 0:
+        context['tests_uploaded'] = True
+    else:
+        context['tests_uploaded'] = False
+    context['tests'] = forms.TestsForm()
+    if request.method == 'POST':
         for field in fields:
-            context[field] = get_info(competition_name, task_name, field)
-        from os import listdir
-        if len(listdir('../competitions/' + competition_name + '/tasks/' + task_name + '/tests')) > 1:
-            context['tests_uploaded'] = True
-        else:
-            context['tests_uploaded'] = False
-        if len(listdir('../competitions/' + competition_name + '/tasks/' + task_name + '/samples')) > 1:
-            context['samples_uploaded'] = True
-        else:
-            context['samples_uploaded'] = False
-        context['tests'] = forms.TestsForm()
-        context['samples'] = forms.SamplesForm()
-        if request.method == 'POST':
-            fields = ['input', 'output', 'legend']
-            for field in fields:
-                write_info(competition_name, task_name, field, request.POST[field])
-            folders = [
-                'tests',
-                'samples'
-            ]
-            from os import remove, system
-            for folder in folders:
-                if folder in request.FILES.keys():
-                    file = request.FILES[folder]
-                    archive = '../competitions/' + competition_name + '/tasks/' + task_name + '/' + folder + \
-                              '/input.zip'
-                    system('touch ' + archive)
-                    with open(archive, 'wb+') as fs:
-                        for chunk in file.chunks():
-                            fs.write(chunk)
-                    with zf(archive) as obj:
-                        l = archive.split('/')
-                        obj.extractall('/'.join(l[0:len(l) - 1]))
-                    remove(archive)
-            return HttpResponseRedirect('/admin/task/' + competition_name + '/' + task_name)
-        return render(request, 'admin/task_settings.html', context=context)
-    return HttpResponseRedirect('/enter')
+            write_info(competition_name, task_name, field, request.POST[field])
+        from os import remove, system
+        if 'tests' in request.FILES.keys():
+            file = request.FILES['tests']
+            archive = '../competitions/' + competition_name + '/tasks/' + task_name + '/tests/input.zip'
+            system('touch ' + archive)
+            with open(archive, 'wb+') as fs:
+                for chunk in file.chunks():
+                    fs.write(chunk)
+            with zf(archive) as obj:
+                l = archive.split('/')
+                obj.extractall('/'.join(l[0:len(l) - 1]))
+            remove(archive)
+        return HttpResponseRedirect('/admin/task/' + competition_name + '/' + task_name)
+    return render(request, 'admin/task_settings.html', context=context)
 
 
 def admin_new_task(request, competition_name):
-    if request.user.is_authenticated and request.user.is_staff:
-        if request.method == 'GET':
-            return render(request, 'admin/new_task.html', context={'form': forms.NewTaskForm(),
-                                                                   'name': competition_name})
-        else:
-            from os import mkdir, system
-            task_name = request.POST['name']
-            this_directory = '../competitions/' + competition_name + '/tasks/' + task_name + '/'
-            mkdir(this_directory)
-            mkdir('../competitions/' + competition_name + '/solutions/' + task_name + '/')
-            mkdir(this_directory + 'tests')
-            mkdir(this_directory + 'samples')
-            system('touch ' + this_directory + 'input.txt')
-            system('touch ' + this_directory + 'output.txt')
-            system('touch ' + this_directory + 'legend.txt')
-            return HttpResponseRedirect('/admin/competition/' + competition_name)
-    return HttpResponseRedirect('/enter')
+    check_admin(request)
+    if request.method == 'GET':
+        return render(request, 'admin/new_task.html', context={'form': forms.NewTaskForm(),
+                                                               'name': competition_name})
+    else:
+        from os import mkdir, system
+        task_name = request.POST['name']
+        this_directory = '../competitions/' + competition_name + '/tasks/' + task_name + '/'
+        mkdir(this_directory)
+        mkdir('../competitions/' + competition_name + '/solutions/' + task_name + '/')
+        mkdir(this_directory + 'tests')
+        system('touch ' + this_directory + 'input.txt')
+        system('touch ' + this_directory + 'output.txt')
+        system('touch ' + this_directory + 'legend.txt')
+        system('touch ' + this_directory + 'specifications.txt')
+        return HttpResponseRedirect('/admin/task/' + competition_name + '/' + task_name)
 
 
 def admin_main(request):
-    if request.user.is_authenticated and request.user.is_staff:
-        return render(request, "admin/admin.html", context={"competitions": admin_competitions_table()})
-    return HttpResponseRedirect('/enter')
+    check_admin(request)
+    return render(request, "admin/admin.html", context={"competitions": admin_competitions_table()})
 
 ########################################################################################################################
-
-
-def get_samples(competition_name, task_name):
-    from os import listdir
-    from os.path import isfile, abspath, exists
-    folder = '../competitions/' + competition_name + '/tasks/' + task_name + '/samples/'
-    html = ''
-    count = 1
-    while True:
-        if not exists(folder + "{:02d}".format(count)):
-            break
-        html += '<h3>Пример ' + str(count) + '</h3>\n'
-        html += '<table width="400">\n<tr><td><h4>Вход</h4>'
-        html += open(folder + "{:02d}".format(count), 'r').read() + '</td>\n<td><h4>Выход</h4>\n'
-        html += open(folder + "{:02d}".format(count) + '.a', 'r').read() + '</td>\n</tr>\n</table>'
-        count += 1
-    return html
 
 
 # получить список всех соревнований (потом надо будет сделать фильтр)
@@ -339,13 +318,11 @@ def write_info(competition_name, task_name, filename, text):
 
 
 def main(request):
-    if request.user.is_authenticated:
-        if request.user.is_staff:
-            return render(request, "admin/main.html", context={"competitions": competitions_table()})
-        else:
-            return render(request, "competitor/main.html", context={"competitions": competitions_table()})
+    check_login(request)
+    if request.user.is_staff:
+        return render(request, "admin/main.html", context={"competitions": competitions_table()})
     else:
-        return HttpResponseRedirect("/enter")
+        return render(request, "competitor/main.html", context={"competitions": competitions_table()})
 
 
 def redirect(request):
@@ -353,73 +330,68 @@ def redirect(request):
 
 
 def competition(request, name):
-    if request.user.is_authenticated:
-        if request.user.is_staff:
-            return render(request, "admin/competition.html", context={"name": name, 'tasks': tasks_table(name)})
-        else:
-            return render(request, "competitor/competition.html", context={"name": name, 'tasks': tasks_table(name)})
+    check_login(request)
+    if request.user.is_staff:
+        return render(request, "admin/competition.html", context={"name": name, 'tasks': tasks_table(name)})
     else:
-        return HttpResponseRedirect('/enter')
+        return render(request, "competitor/competition.html", context={"name": name, 'tasks': tasks_table(name)})
 
 
 def task(request, competition_name, task_name):
-    if request.user.is_authenticated:
-        if request.method == 'GET':
-            context={
-                'competition_name': competition_name,
-                'task_name': task_name,
-                'legend': get_info(competition_name, task_name, 'legend'),
-                'input': get_info(competition_name, task_name, 'input'),
-                'output': get_info(competition_name, task_name, 'output'),
-                'samples': get_samples(competition_name, task_name),
-                'form': forms.FileForm()
-            }
-            if request.user.is_staff:
-                return render(request, "admin/task.html", context=context)
-            else:
-                return render(request, "competitor/task.html", context=context)
+    check_login(request)
+    if request.method == 'GET':
+        context = {
+            'competition_name': competition_name,
+            'task_name': task_name,
+            'legend': get_info(competition_name, task_name, 'legend'),
+            'input': get_info(competition_name, task_name, 'input'),
+            'output': get_info(competition_name, task_name, 'output'),
+            'specifications': get_info(competition_name, task_name, 'specifications'),
+            'form': forms.FileForm()
+        }
+        if request.user.is_staff:
+            return render(request, "admin/task.html", context=context)
         else:
-            form = forms.FileForm(request.POST, request.FILES)
-            if form.is_valid():
-                from os import mkdir, remove, rmdir
-                file = request.FILES['file']
-                this_directory = '../competitions/' + competition_name + '/solutions/' + task_name + '/'
-                index = current_index()
-                with open(this_directory + str(index) + '.zip', 'wb') as fs:
-                    for chunk in file.chunks():
-                        fs.write(chunk)
-                from os import remove
-                with zf(this_directory + str(index) + '.zip') as obj:
-                    obj.extractall(this_directory + str(index) + '/')
-                remove(this_directory + str(index) + '.zip')
-                connector = connect('db.sqlite3')
-                cursor = connector.cursor()
-                cursor.execute("INSERT INTO Solutions VALUES (?, ?, ?, ?)", (index,
-                                                                             competition_name,
-                                                                             task_name,
-                                                                             request.user.username))
-                connector.commit()
-                cursor.close()
-                connector.close()
-            return HttpResponseRedirect('/task/' + competition_name + '/' + task_name)
-    return HttpResponseRedirect('/enter')
+            return render(request, "competitor/task.html", context=context)
+    else:
+        form = forms.FileForm(request.POST, request.FILES)
+        if form.is_valid():
+            from os import mkdir, remove, rmdir
+            file = request.FILES['file']
+            this_directory = '../competitions/' + competition_name + '/solutions/' + task_name + '/'
+            index = current_index()
+            with open(this_directory + str(index) + '.zip', 'wb') as fs:
+                for chunk in file.chunks():
+                    fs.write(chunk)
+            from os import remove
+            with zf(this_directory + str(index) + '.zip') as obj:
+                obj.extractall(this_directory + str(index) + '/')
+            remove(this_directory + str(index) + '.zip')
+            connector = connect('db.sqlite3')
+            cursor = connector.cursor()
+            cursor.execute("INSERT INTO Solutions VALUES (?, ?, ?, ?)", (index,
+                                                                         competition_name,
+                                                                         task_name,
+                                                                         request.user.username))
+            connector.commit()
+            cursor.close()
+            connector.close()
+            from contest.Tester import Tester
+            Tester(competition_name, task_name, index).start()
+        return HttpResponseRedirect('/task/' + competition_name + '/' + task_name)
 
 
 def settings(request):
-    if request.user.is_authenticated:
-        if request.user.is_staff:
-            return render(request, 'admin/settings.html', context={'name': request.user.username})
-        else:
-            return render(request, "competitor/settings.html", context={"name": request.user.username})
+    check_login(request)
+    if request.user.is_staff:
+        return render(request, 'admin/settings.html', context={'name': request.user.username})
     else:
-        return HttpResponseRedirect("/enter")
+        return render(request, "competitor/settings.html", context={"name": request.user.username})
 
 
 def restore(request):
-    if request.user.is_authenticated:
-        return HttpResponseRedirect("/main")
-    else:
-        return render(request, "restore.html")
+    check_login(request)
+    return HttpResponseRedirect("/main")
 
 
 def enter(request):

@@ -12,7 +12,7 @@
         <button class="button_header_admin" onclick="main()">Главная</button><button class="button_header_admin" onclick="admin()">Админка</button><button class="button_header_admin" onclick="settings()">Настройки</button><button class="button_header_admin" onclick="logout()">Выход</button>
         <hr>
     </div>
-    <h1><center>{{ competition }}</center></h1>
+    <h1><center><a href="http://127.0.0.1:8000/admin/competition/{{ competition }}">{{ competition }}</a></center></h1>
     <h2><center>{{ task }}</center></h2>
     <div style="text-align: center;">
         <form action="" method="POST" enctype="multipart/form-data">
@@ -44,6 +44,14 @@
                 </tr>
                 <tr>
                     <td>
+                        Спецификации
+                    </td>
+                    <td>
+                        <textarea rows="10" cols="50" style="resize: none;" name="specifications">{{ specifications }}</textarea>
+                    </td>
+                </tr>
+                <tr>
+                    <td>
                         {{ tests }}
                     </td>
                     <td>
@@ -52,21 +60,12 @@
                         {% endif %}
                     </td>
                 </tr>
-                <tr>
-                    <td>
-                        {{ samples }}
-                    </td>
-                    <td>
-                        {% if samples_uploaded %}
-                            <h5><span style="color: red; ">Самплы загружены</span></h5>
-                        {% endif %}
-                    </td>
-                </tr>
             </table>
             <hr>
             <input type="submit" value="Сохранить" class=enter_simple>
         </form>
             <input type="button" value="Удалить таск" class=enter_simple onclick="delete_task('{{ competition }}', '{{ task }}')">
+            <input type="button" value="Очистить тесты" class=enter_simple onclick="remove_tests('{{ competition }}', '{{ task }}')">
     </div>
 </body>
 </html>

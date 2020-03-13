@@ -20,7 +20,3 @@ class NewTaskForm(forms.Form):
 
 class TestsForm(forms.Form):
     tests = forms.FileField(widget=forms.FileInput(), required=False)
-
-
-class SamplesForm(forms.Form):
-    samples = forms.FileField(widget=forms.FileInput(), required=False)
