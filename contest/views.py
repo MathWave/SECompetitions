@@ -8,6 +8,7 @@ from django.contrib.auth import login, logout
 from sqlite3 import connect
 from zipfile import ZipFile as zf
 from urllib.request import quote
+from threading import Thread
 
 
 ########################################################################################################################
@@ -27,10 +28,8 @@ def current_index():
     connector = connect('db.sqlite3')
     cursor = connector.cursor()
     cursor.execute('SELECT * FROM Solutions')
-    all = cursor.fetchall()
-    number = 0
-    if len(all) != 0:
-        number = cursor.fetchall()[-1][0] + 1
+    full = cursor.fetchall()
+    number = 0 if len(full) == 0 else full[-1][0] + 1
     cursor.close()
     connector.close()
     return number
@@ -46,9 +45,22 @@ def solution_info(id):
     return {
         'competition': res[1],
         'task': res[2],
-        'username': res[3]
+        'username': res[3],
+        'verdict': res[4]
     }
 
+
+def test(competition_name, task_name, index, connector, cursor):
+    from contest.Tester import Tester
+    thread = Tester(competition_name, task_name, index)
+    thread.start()
+    thread.join(5)
+    cursor.execute('SELECT * FROM Solutions WHERE id = ?', (index,))
+    if cursor.fetchone()[4] == 'TESTING':
+        cursor.execute("UPDATE Solutions SET result = 'Time limit' WHERE id = ?;", (index,))
+    connector.commit()
+    cursor.close()
+    connector.close()
 
 
 ########################################################################################################################
@@ -99,12 +111,12 @@ def solutions_table(competition_name):
     solution_list = cursor.fetchall()
     cursor.close()
     connector.close()
-    table = '<tr><td><b>Id</b></td><td><b>Таск</b></td><td><b>Пользователь</b></td></tr>'
+    table = '<tr><td><b>Id</b></td><td><b>Соревнование</b></td><td><b>Таск</b></td><td><b>Пользователь</b></td><td><b>Вердикт</b></td></tr>'
     for solution in reversed(solution_list):
         table += '<tr>\n'
         table += "<td><a href='http://127.0.0.1:8000/admin/solution/" + str(solution[0]) + "'>" + \
-                 str(solution[0]) + '</a>'
-        for i in 2, 3:
+                 str(solution[0]) + '</a></td>'
+        for i in range(1, 5):
             table += '<td>' + str(solution[i]) + '</td>\n'
         table += '</tr>\n'
     return table
@@ -158,6 +170,7 @@ def admin_show_file(request, id):
                                                             'username': info['username'],
                                                             'id': id,
                                                             'filename': rootdir.split('/')[-1],
+                                                            'verdict': info['verdict'],
                                                             'text': file
                                                            })
 
@@ -189,6 +202,7 @@ def admin_solution(request, id):
                                                            'task': info['task'],
                                                            'username': info['username'],
                                                            'id': id,
+                                                           'verdict': info['verdict'],
                                                            'files': files
                                                   })
 
@@ -211,8 +225,7 @@ def admin_new_competition(request):
 def admin_competition(request, name):
     check_admin(request)
     return render(request, "admin/competitions_settings.html", context={"name": name,
-                                                                        'tasks': admin_tasks_table(name),
-                                                                        'solutions': solutions_table(name)})
+                                                                        'tasks': admin_tasks_table(name)})
 
 
 def admin_task(request, competition_name, task_name):
@@ -303,6 +316,22 @@ def tasks_table(competition_name):
     return line
 
 
+def task_solutions_table(username, competition_name, task_name):
+    connector = connect('db.sqlite3')
+    cursor = connector.cursor()
+    cursor.execute('SELECT * FROM Solutions WHERE competition = ? AND task = ? AND username = ?', (competition_name, task_name, username))
+    solution_list = cursor.fetchall()
+    cursor.close()
+    connector.close()
+    table = '<tr><td><b>Id</b></td><td><b>Соревнование</b></td><td><b>Таск</b></td><td><b>Вердикт</b></td></tr>'
+    for solution in reversed(solution_list):
+        table += '<tr>\n'
+        for i in 0, 1, 2, 4:
+            table += '<td>' + str(solution[i]) + '</td>\n'
+        table += '</tr>\n'
+    return table
+
+
 # считать информацию из файла с входными выходными данными или легендой
 def get_info(competition_name, task_name, filename):
     return '<br />'.join(open('../competitions/' + competition_name + '/tasks/' + task_name + '/' + filename + '.txt')
@@ -329,6 +358,9 @@ def redirect(request):
     return HttpResponseRedirect('/main')
 
 
+
+
+
 def competition(request, name):
     check_login(request)
     if request.user.is_staff:
@@ -347,7 +379,8 @@ def task(request, competition_name, task_name):
             'input': get_info(competition_name, task_name, 'input'),
             'output': get_info(competition_name, task_name, 'output'),
             'specifications': get_info(competition_name, task_name, 'specifications'),
-            'form': forms.FileForm()
+            'form': forms.FileForm(),
+            'solutions': task_solutions_table(request.user.username, competition_name, task_name)
         }
         if request.user.is_staff:
             return render(request, "admin/task.html", context=context)
@@ -369,15 +402,16 @@ def task(request, competition_name, task_name):
             remove(this_directory + str(index) + '.zip')
             connector = connect('db.sqlite3')
             cursor = connector.cursor()
-            cursor.execute("INSERT INTO Solutions VALUES (?, ?, ?, ?)", (index,
+            cursor.execute("INSERT INTO Solutions VALUES (?, ?, ?, ?, ?)", (index,
                                                                          competition_name,
                                                                          task_name,
-                                                                         request.user.username))
+                                                                         request.user.username,
+                                                                            'TESTING'))
             connector.commit()
             cursor.close()
             connector.close()
-            from contest.Tester import Tester
-            Tester(competition_name, task_name, index).start()
+            from contest.TesterGlobal import TesterGlobal
+            TesterGlobal(competition_name, task_name, index, 3000).start()
         return HttpResponseRedirect('/task/' + competition_name + '/' + task_name)
 
 
@@ -422,4 +456,5 @@ def create_user(request, username, password):
 
 
 # ======================================================================================================================
+
 # ======================================================================================================================
