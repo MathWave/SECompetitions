@@ -2,15 +2,10 @@
 <project version="4">
   <component name="ChangeListManager">
     <list default="true" id="df440fb9-1a96-4034-ae0e-83ac9dcfeb0a" name="Default Changelist" comment="">
-      <change afterPath="$PROJECT_DIR$/contest/TesterGlobal.py" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/contest/Tester.py" beforeDir="false" afterPath="$PROJECT_DIR$/contest/Tester.py" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/SECompetitions/urls.py" beforeDir="false" afterPath="$PROJECT_DIR$/SECompetitions/urls.py" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/contest/views.py" beforeDir="false" afterPath="$PROJECT_DIR$/contest/views.py" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/db.sqlite3" beforeDir="false" afterPath="$PROJECT_DIR$/db.sqlite3" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/templates/admin/show_file.html" beforeDir="false" afterPath="$PROJECT_DIR$/templates/admin/show_file.html" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/templates/admin/solution.html" beforeDir="false" afterPath="$PROJECT_DIR$/templates/admin/solution.html" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/templates/admin/task.html" beforeDir="false" afterPath="$PROJECT_DIR$/templates/admin/task.html" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/templates/competitor/task.html" beforeDir="false" afterPath="$PROJECT_DIR$/templates/competitor/task.html" afterDir="false" />
     </list>
     <option name="EXCLUDED_CONVERTED_TO_IGNORED" value="true" />
     <option name="SHOW_DIALOG" value="false" />
@@ -162,7 +157,10 @@
       <workItem from="1585047996615" duration="1583000" />
       <workItem from="1585061920304" duration="53000" />
       <workItem from="1585071128654" duration="11000" />
-      <workItem from="1585075026579" duration="2270000" />
+      <workItem from="1585075026579" duration="3671000" />
+      <workItem from="1585120003436" duration="546000" />
+      <workItem from="1585132683951" duration="499000" />
+      <workItem from="1585149482854" duration="3438000" />
     </task>
     <task id="LOCAL-00001" summary="Отправка условий контеста происходит через формы">
       <created>1582733624850</created>
@@ -199,7 +197,14 @@
       <option name="project" value="LOCAL" />
       <updated>1584087728580</updated>
     </task>
-    <option name="localTasksCounter" value="6" />
+    <task id="LOCAL-00006" summary="Теперь тестирует&#10;Есть четыре вердикта: passed, failed, compilation error и time limit">
+      <created>1585080317216</created>
+      <option name="number" value="00006" />
+      <option name="presentableId" value="LOCAL-00006" />
+      <option name="project" value="LOCAL" />
+      <updated>1585080317216</updated>
+    </task>
+    <option name="localTasksCounter" value="7" />
     <servers />
   </component>
   <component name="TypeScriptGeneratedFilesManager">
@@ -224,7 +229,8 @@
     <MESSAGE value="Немного подправил дизайн отображения файла&#10;Теперь нельзя выйти за пределы директории проверки работы" />
     <MESSAGE value="Добавлена возможность удалять соревнования и таски" />
     <MESSAGE value="Много всего добавил" />
-    <option name="LAST_COMMIT_MESSAGE" value="Много всего добавил" />
+    <MESSAGE value="Теперь тестирует&#10;Есть четыре вердикта: passed, failed, compilation error и time limit" />
+    <option name="LAST_COMMIT_MESSAGE" value="Теперь тестирует&#10;Есть четыре вердикта: passed, failed, compilation error и time limit" />
   </component>
   <component name="XDebuggerManager">
     <breakpoint-manager>

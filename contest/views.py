@@ -388,7 +388,7 @@ def task(request, competition_name, task_name):
             return render(request, "competitor/task.html", context=context)
     else:
         form = forms.FileForm(request.POST, request.FILES)
-        if form.is_valid():
+        if 'file' in request.FILES.keys():
             from os import mkdir, remove, rmdir
             file = request.FILES['file']
             this_directory = '../competitions/' + competition_name + '/solutions/' + task_name + '/'
@@ -454,6 +454,64 @@ def create_user(request, username, password):
     User.objects.create_user(username=username, password=password)
     return HttpResponse("OK")
 
+
+def reset(request):
+    connector = connect('db.sqlite3')
+    cursor = connector.cursor()
+    cursor.execute('DROP TABLE IF EXISTS Solutions;')
+    cursor.execute('DROP TABLE IF EXISTS Competitions;')
+    cursor.execute('DROP TABLE IF EXISTS Tasks;')
+    cursor.execute('DROP TABLE IF EXISTS Tests;')
+    cursor.execute(
+        '''
+        CREATE TABLE Solutions(
+            id INTEGER PRIMARY KEY AUTOINCREMENT,
+            task_id INTEGER,
+            username TEXT,
+            result TEXT
+        );
+        '''
+    )
+    cursor.execute(
+        '''
+        CREATE TABLE Competitions(
+            id INTEGER PRIMARY KEY AUTOINCREMENT,
+            name TEXT
+        );
+        '''
+    )
+    cursor.execute(
+        '''
+        CREATE TABLE Tasks(
+            id INTEGER PRIMARY KEY AUTOINCREMENT,
+            name TEXT,
+            solution_id INTEGER,
+            legend TEXT,
+            input TEXT,
+            output TEXT,
+            specifications TEXT,
+            tests_uploaded INTEGER
+        );
+        '''
+    )
+    cursor.execute(
+        '''
+        CREATE TABLE Tests(
+            id INTEGER PRIMARY KEY AUTOINCREMENT,
+            task_id INTEGER
+        );
+        '''
+    )
+    connector.commit()
+    cursor.close()
+    from os import system
+    from os.path import exists
+    if exists('../data'):
+        system('rm -r ../data')
+    system('mkdir ../data')
+    system('mkdir ../data/solutions')
+    system('mkdir ../data/tests')
+    return HttpResponseRedirect('/main')
 
 # ======================================================================================================================
 
