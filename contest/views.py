@@ -13,6 +13,7 @@ from threading import Thread
 
 ########################################################################################################################
 
+
 def check_login(request):
     if not request.user.is_authenticated:
         return HttpResponseRedirect('/enter')
@@ -24,193 +25,188 @@ def check_admin(request):
         return HttpResponseRedirect('/enter')
 
 
-def current_index():
+def open_db():
     connector = connect('db.sqlite3')
     cursor = connector.cursor()
-    cursor.execute('SELECT * FROM Solutions')
-    full = cursor.fetchall()
-    number = 0 if len(full) == 0 else full[-1][0] + 1
-    cursor.close()
-    connector.close()
-    return number
+    return connector, cursor
 
 
-def solution_info(id):
-    connector = connect('db.sqlite3')
-    cursor = connector.cursor()
-    cursor.execute('SELECT * FROM Solutions WHERE id = ?', (id,))
-    res = cursor.fetchone()
-    cursor.close()
-    connector.close()
-    return {
-        'competition': res[1],
-        'task': res[2],
-        'username': res[3],
-        'verdict': res[4]
-    }
-
-
-def test(competition_name, task_name, index, connector, cursor):
-    from contest.Tester import Tester
-    thread = Tester(competition_name, task_name, index)
-    thread.start()
-    thread.join(5)
-    cursor.execute('SELECT * FROM Solutions WHERE id = ?', (index,))
-    if cursor.fetchone()[4] == 'TESTING':
-        cursor.execute("UPDATE Solutions SET result = 'Time limit' WHERE id = ?;", (index,))
+def close_db(connector):
     connector.commit()
-    cursor.close()
     connector.close()
 
 
 ########################################################################################################################
-
-
-# создать шаблон для соревнования
-def admin_create_competition_template(name):
-    from os.path import exists
-    from os import mkdir, system
-    if not exists('../competitions'):
-        mkdir('../competitions')
-    mkdir('../competitions/' + name)
-    mkdir('../competitions/' + name + '/tasks')
-    mkdir('../competitions/' + name + '/solutions')
 
 
 # получить список соревнований
 def admin_competitions_table():
-    from os import listdir, mkdir
-    from os.path import exists
-    if not exists('../competitions'):
-        mkdir('../competitions')
-    comps = sorted(listdir('../competitions'))
+    connector, cursor = open_db()
+    cursor.execute("SELECT * FROM Competitions")
+    comps = cursor.fetchall()
     line = '<table>\n'
     for c in comps:
-        if not c.startswith('.'):
-            line += '<tr><td><a href="http://127.0.0.1:8000/admin/competition/' + c + '">' + c + '</td></tr>\n'
+        line += '<tr><td><a href="http://127.0.0.1:8000/admin/competition?competition_id=' + str(c[0]) + '">' + c[1] + '</td></tr>\n'
     line += '</table>'
+    close_db(connector)
     return line
 
 
-def admin_tasks_table(competition_name):
-    from os import listdir
-    tasks = sorted(listdir('../competitions/' + competition_name + '/tasks'))
+def admin_tasks_table(competition_id):
+    connector, cursor = open_db()
+    cursor.execute("SELECT * FROM Tasks WHERE competition_id = ?", (competition_id,))
+    tasks = cursor.fetchall()
+    close_db(connector)
     line = '<table>\n'
     for c in tasks:
-        if not c.startswith('.'):
-            line += '<tr><td><a href="http://127.0.0.1:8000/admin/task/' + competition_name + '/' + c + '">' + c + \
-                    '</td></tr>\n'
+        line += '<tr><td><a href="http://127.0.0.1:8000/admin/task?task_id=' + str(c[0]) + '">' + c[1] + '</td></tr>\n'
     line += '</table>'
     return line
 
 
-def solutions_table(competition_name):
-    connector = connect('db.sqlite3')
-    cursor = connector.cursor()
-    cursor.execute('SELECT * FROM Solutions WHERE competition = ?', (competition_name,))
+def solutions_table(competition_id):
+    connector, cursor = open_db()
+    cursor.execute('SELECT * FROM Solutions '
+                   'INNER JOIN Tasks ON Solutions.Task_id = Tasks.id '
+                   'WHERE competition_id = ?', (competition_id,))
     solution_list = cursor.fetchall()
-    cursor.close()
-    connector.close()
-    table = '<tr><td><b>Id</b></td><td><b>Соревнование</b></td><td><b>Таск</b></td><td><b>Пользователь</b></td><td><b>Вердикт</b></td></tr>'
+    close_db(connector)
+    table = '<tr><td><b>Id</b></td><td><b>Таск</b></td><td><b>Пользователь</b></td><td><b>Вердикт</b></td></tr>'
     for solution in reversed(solution_list):
         table += '<tr>\n'
-        table += "<td><a href='http://127.0.0.1:8000/admin/solution/" + str(solution[0]) + "'>" + \
+        table += "<td><a href='http://127.0.0.1:8000/admin/solution?solution_id=" + str(solution[0]) + "'>" + \
                  str(solution[0]) + '</a></td>'
-        for i in range(1, 5):
+        for i in 5, 2, 3:
             table += '<td>' + str(solution[i]) + '</td>\n'
         table += '</tr>\n'
     return table
 
+
 ########################################################################################################################
 
 
-def admin_delete_task(request, competition_name, task_name):
+def admin_delete_task(request):
     check_admin(request)
+    task_id = request.GET['task_id']
     connector = connect('db.sqlite3')
     cursor = connector.cursor()
-    cursor.execute('DELETE FROM Solutions WHERE competition = ? AND task = ?', (competition_name, task_name, ))
-    connector.commit()
-    cursor.close()
-    connector.close()
+    cursor.execute('SELECT competition_id FROM Tasks WHERE id = ?', (task_id,))
+    competition_id = cursor.fetchone()[0]
+    cursor.execute('SELECT * FROM Solutions WHERE task_id = ?', (task_id,))
+    solutions_ids = [s[0] for s in cursor.fetchall()]
+    cursor.execute('DELETE FROM Solutions WHERE task_id = ?', (task_id,))
+    cursor.execute('DELETE FROM Tasks WHERE id = ?', (task_id,))
+    cursor.execute('DELETE FROM Tests WHERE task_id = ?', (task_id,))
+    close_db(connector)
     from os import system
-    system('rm -r ../competitions/' + competition_name + '/tasks/' + task_name)
-    system('rm -r ../competitions/' + competition_name + '/solutions/' + task_name)
-    return HttpResponseRedirect('/admin/competition/' + competition_name)
+    for i in solutions_ids:
+        system('rm -r ../data/solutions/' + str(i))
+    system('rm -r ../data/tests/' + str(task_id) + '.dll')
+    return HttpResponseRedirect('/admin/competition?competition_id=' + str(competition_id))
 
 
-def admin_delete_competition(request, competition_name):
+def admin_delete_competition(request):
     check_admin(request)
-    connector = connect('db.sqlite3')
-    cursor = connector.cursor()
-    cursor.execute('DELETE FROM Solutions WHERE competition = ?', (competition_name, ))
-    connector.commit()
-    cursor.close()
-    connector.close()
+    competition_id = request.GET['competition_id']
+    connector, cursor = open_db()
+    cursor.execute('SELECT * FROM Tasks WHERE competition_id = ?', (competition_id,))
+    task_ids = [(i[0],) for i in cursor.fetchall()]
     from os import system
-    system('rm -r ../competitions/' + competition_name)
+    for i in task_ids:
+        cursor.execute('SELECT * FROM Solutions WHERE task_id = ?;', i)
+        for s in cursor.fetchall():
+            system('rm -r ../data/solutions/' + str(s[0]))
+        system('rm -r ../data/tests/' + str(i[0]) + '.dll')
+    cursor.executemany('DELETE FROM Solutions WHERE task_id = ?', task_ids)
+    cursor.execute('DELETE FROM Tasks WHERE competition_id = ?', (competition_id,))
+    cursor.execute('DELETE FROM Competitions WHERE id = ?', (competition_id,))
+    close_db(connector)
     return HttpResponseRedirect('/admin/main')
 
 
-def admin_remove_tests(request, competition_name, task_name):
+def admin_remove_tests(request):
     check_admin(request)
-    from os import system, mkdir
-    system('rm -r ../competitions/' + competition_name + '/tasks/' + task_name + '/tests')
-    mkdir('../competitions/' + competition_name + '/tasks/' + task_name + '/tests')
-    return HttpResponseRedirect('/admin/task/' + competition_name + '/' + task_name)
+    task_id = request.GET['task_id']
+    connector, cursor = open_db()
+    cursor.execute('UPDATE Tasks SET tests_uploaded = 0 WHERE id = ?', (task_id,))
+    close_db(connector)
+    from os import remove
+    remove('../data/tests/' + task_id + '.dll')
+    return HttpResponseRedirect('/admin/task?task_id=' + task_id)
 
 
-def admin_show_file(request, id):
+def admin_show_file(request):
     check_admin(request)
-    info = solution_info(id)
-    rootdir = '../competitions/' + info['competition'] + '/solutions/' + info['task'] + '/' + id + '/' + \
-              request.GET.get('file', '')
+    solution_id = request.GET['solution_id']
+    connector, cursor = open_db()
+    cursor.execute('SELECT * FROM Solutions WHERE id = ?', (solution_id,))
+    info = cursor.fetchone()
+    cursor.execute('SELECT * FROM Tasks WHERE id = ?', (info[1],))
+    task_info = cursor.fetchone()
+    cursor.execute('SELECT * FROM Competitions WHERE id = ?', (task_info[2],))
+    competition = cursor.fetchone()[1]
+    close_db(connector)
+    rootdir = '../data/solutions/' + str(solution_id) + '/' + request.GET.get('file', '')
     file = open(rootdir, 'r').read()
-    return render(request, 'admin/show_file.html', context={'competition': info['competition'],
-                                                            'task': info['task'],
-                                                            'username': info['username'],
-                                                            'id': id,
+    return render(request, 'admin/show_file.html', context={'competition': competition,
+                                                            'task': task_info[1],
+                                                            'username': info[2],
+                                                            'id': solution_id,
                                                             'filename': rootdir.split('/')[-1],
-                                                            'verdict': info['verdict'],
+                                                            'verdict': info[3],
                                                             'text': file
-                                                           })
+                                                            })
 
 
-def admin_solution(request, id):
+def admin_solution(request):
     check_admin(request)
+    solution_id = request.GET['solution_id']
     folder = request.GET.get('folder', '')
     if '..' in folder:
         return HttpResponseRedirect('/enter')
-    info = solution_info(id)
+    connector, cursor = open_db()
+    cursor.execute('SELECT * FROM Solutions WHERE id = ?', (solution_id,))
+    info = cursor.fetchone()
     files = ''
     from os import listdir
-    from os.path import isfile, abspath, isdir
-    rootdir = '../competitions/' + info['competition'] + '/solutions/' + info['task'] + '/' + id + '/' + \
-              request.GET.get('folder', '')
+    from os.path import isfile, join
+    rootdir = '../data/solutions/' + str(solution_id) + '/' + folder
     for file in sorted(listdir(rootdir)):
+        current_file = join(rootdir, file)
         files += '<div><img src="'
-        a = abspath(file)
-        if isfile(rootdir + '/' + file):
+        if isfile(current_file):
             files += 'http://icons.iconarchive.com/icons/icons8/windows-8/16/Very-Basic-Document-icon.png'
             f = '/'.join(rootdir.split('/')[6:])
-            files += '">    <a href=http://127.0.0.1:8000/admin/show_file/' + id + '?file=' + \
-                     quote('/'.join(rootdir.split('/')[6:]) + '/' + file, safe='') + '>' + file + '</div>\n'
+            files += '">    <a href=http://127.0.0.1:8000/admin/show_file?solution_id=' + str(solution_id) + '&file=' + \
+                     quote('/'.join(current_file.split('/')[4:]), safe='') + '>' + file + '</div>\n'
         else:
             files += 'http://icons.iconarchive.com/icons/icons8/ios7/16/Very-Basic-Opened-Folder-icon.png'
-            files += '">    <a href=http://127.0.0.1:8000/admin/solution/' + id + '?folder=' + \
-                     quote('/'.join(rootdir.split('/')[6:]) + '/' + file, safe='') + '>' + file + '</div>\n'
-    return render(request, 'admin/solution.html', context={'competition': info['competition'],
-                                                           'task': info['task'],
-                                                           'username': info['username'],
-                                                           'id': id,
-                                                           'verdict': info['verdict'],
+            files += '">    <a href=http://127.0.0.1:8000/admin/solution?solution_id=' + str(solution_id) + '&folder=' + \
+                     quote('/'.join(current_file.split('/')[4:]), safe='') + '>' + file + '</div>\n'
+    cursor.execute('SELECT * FROM Tasks WHERE id = ?', (info[1],))
+    task_info = cursor.fetchone()
+    cursor.execute('SELECT * FROM Competitions WHERE id = ?', (task_info[2],))
+    competition = cursor.fetchone()[1]
+    close_db(connector)
+    return render(request, 'admin/solution.html', context={'competition': competition,
+                                                           'task': task_info[1],
+                                                           'username': info[2],
+                                                           'id': info[0],
+                                                           'verdict': info[3],
                                                            'files': files
-                                                  })
+                                                           })
 
 
-def admin_solutions(request, competition_name):
+def admin_solutions(request):
     check_admin(request)
-    return render(request, "admin/solutions.html", context={'name': competition_name,
-                                                            'solutions': solutions_table(competition_name)})
+    connector, cursor = open_db()
+    cursor.execute('SELECT * FROM Competitions WHERE id = ?', (request.GET['competition_id']))
+    name = cursor.fetchone()[1]
+    close_db(connector)
+    return render(request, "admin/solutions.html",
+                  context={'competition_id': request.GET['competition_id'],
+                           'solutions': solutions_table(request.GET['competition_id']),
+                           'name': name})
 
 
 def admin_new_competition(request):
@@ -218,129 +214,139 @@ def admin_new_competition(request):
     if request.method == 'GET':
         return render(request, "admin/new_competition.html", context={"form": forms.NewCompetitionForm()})
     else:
-        admin_create_competition_template(request.POST.get('name'))
-        return HttpResponseRedirect('/admin/competition/' + request.POST.get('name'))
+        name = request.POST['name']
+        connector, cursor = open_db()
+        cursor.execute("INSERT INTO Competitions (competition_name) VALUES (?);", (name,))
+        close_db(connector)
+        connector, cursor = open_db()
+        cursor.execute('SELECT id FROM Competitions WHERE competition_name = ?', (request.POST['name'],))
+        competition_id = cursor.fetchone()[0]
+        close_db(connector)
+        return HttpResponseRedirect('/admin/competition?competition_id=' + str(competition_id))
 
 
-def admin_competition(request, name):
+def admin_competition(request):
     check_admin(request)
-    return render(request, "admin/competitions_settings.html", context={"name": name,
-                                                                        'tasks': admin_tasks_table(name)})
+    competition_id = request.GET['competition_id']
+    connector, cursor = open_db()
+    cursor.execute('SELECT competition_name FROM Competitions WHERE id = ?', (competition_id,))
+    name = cursor.fetchone()[0]
+    return render(request, "admin/competitions_settings.html",
+                  context={"name": name,
+                           'tasks': admin_tasks_table(request.GET['competition_id']),
+                           'competition_id': request.GET['competition_id']})
 
 
-def admin_task(request, competition_name, task_name):
+def admin_task(request):
     check_admin(request)
-    fields = ['legend', 'input', 'output', 'specifications']
-    context = {
-        'competition': competition_name,
-        'task': task_name
-    }
-    for field in fields:
-        context[field] = get_info(competition_name, task_name, field)
-    from os import listdir
-    if len(listdir('../competitions/' + competition_name + '/tasks/' + task_name + '/tests')) != 0:
-        context['tests_uploaded'] = True
-    else:
-        context['tests_uploaded'] = False
-    context['tests'] = forms.TestsForm()
+    connector, cursor = open_db()
+    cursor.execute('SELECT * FROM Tasks WHERE id = ?', (request.GET['task_id'],))
+    this_task = cursor.fetchone()
+    cursor.execute('SELECT competition_name from Competitions WHERE id = ?', (this_task[2],))
+    competition_name = cursor.fetchone()[0]
+    context = {'competition': competition_name, 'task': this_task[1], 'legend': this_task[3], 'input': this_task[4],
+               'output': this_task[5], 'specifications': this_task[6], 'tests_uploaded': bool(this_task[7]),
+               'tests': forms.TestsForm(), 'competition_id': this_task[2], 'task_id': request.GET['task_id']}
     if request.method == 'POST':
-        for field in fields:
-            write_info(competition_name, task_name, field, request.POST[field])
-        from os import remove, system
-        if 'tests' in request.FILES.keys():
+        have_tests = int('tests' in request.FILES.keys())
+        cursor.execute("UPDATE Tasks SET "
+                       "legend = ?, "
+                       "input = ?, "
+                       "output = ?, "
+                       "specifications = ?, "
+                       "tests_uploaded = ? "
+                       "WHERE id = ?;",
+                       (request.POST['legend'],
+                        request.POST['input'],
+                        request.POST['output'],
+                        request.POST['specifications'],
+                        have_tests,
+                        request.GET['task_id']))
+        from os import system
+        if have_tests:
             file = request.FILES['tests']
-            archive = '../competitions/' + competition_name + '/tasks/' + task_name + '/tests/input.zip'
-            system('touch ' + archive)
-            with open(archive, 'wb+') as fs:
+            test_file = '../data/tests/' + str(this_task[0]) + '.dll'
+            system('touch ' + test_file)
+            with open(test_file, 'wb+') as fs:
                 for chunk in file.chunks():
                     fs.write(chunk)
-            with zf(archive) as obj:
-                l = archive.split('/')
-                obj.extractall('/'.join(l[0:len(l) - 1]))
-            remove(archive)
-        return HttpResponseRedirect('/admin/task/' + competition_name + '/' + task_name)
+        close_db(connector)
+        return HttpResponseRedirect('/admin/task?task_id=' + str(this_task[0]))
     return render(request, 'admin/task_settings.html', context=context)
 
 
-def admin_new_task(request, competition_name):
+def admin_new_task(request):
     check_admin(request)
+    connector, cursor = open_db()
+    cursor.execute('SELECT competition_name FROM Competitions WHERE id = ?', (request.GET['competition_id'],))
+    competition_name = cursor.fetchone()[0]
     if request.method == 'GET':
         return render(request, 'admin/new_task.html', context={'form': forms.NewTaskForm(),
-                                                               'name': competition_name})
+                                                               'name': competition_name,
+                                                               'competition_id': request.GET['competition_id']})
     else:
-        from os import mkdir, system
         task_name = request.POST['name']
-        this_directory = '../competitions/' + competition_name + '/tasks/' + task_name + '/'
-        mkdir(this_directory)
-        mkdir('../competitions/' + competition_name + '/solutions/' + task_name + '/')
-        mkdir(this_directory + 'tests')
-        system('touch ' + this_directory + 'input.txt')
-        system('touch ' + this_directory + 'output.txt')
-        system('touch ' + this_directory + 'legend.txt')
-        system('touch ' + this_directory + 'specifications.txt')
-        return HttpResponseRedirect('/admin/task/' + competition_name + '/' + task_name)
+        cursor.execute('SELECT * FROM Tasks')
+        full = cursor.fetchall()
+        index = full[-1][0] + 1 if full else 1
+        cursor.execute("INSERT INTO Tasks VALUES (?, ?, ?, ?, ?, ?, ?, ?)", (index,
+                                                                             task_name,
+                                                                             request.GET['competition_id'],
+                                                                             '',
+                                                                             '',
+                                                                             '',
+                                                                             '',
+                                                                             0))
+        close_db(connector)
+        return HttpResponseRedirect('/admin/task?task_id=' + str(index))
 
 
 def admin_main(request):
     check_admin(request)
     return render(request, "admin/admin.html", context={"competitions": admin_competitions_table()})
 
+
 ########################################################################################################################
 
 
 # получить список всех соревнований (потом надо будет сделать фильтр)
 def competitions_table():
-    from os import listdir, mkdir
-    from os.path import exists
-    if not exists('../competitions'):
-        mkdir('../competitions')
-    comps = sorted(listdir('../competitions'))
+    connector, cursor = open_db()
+    cursor.execute("SELECT * FROM Competitions")
+    comps = cursor.fetchall()
     line = '<table>\n'
     for c in comps:
-        if not c.startswith('.'):
-            line += '<tr><td><a href="http://127.0.0.1:8000/competition/' + c + '">' + c + '</td></tr>\n'
+        line += '<tr><td><a href="http://127.0.0.1:8000/competition?competition_id=' + str(c[0]) + '">' + c[1] + '</td></tr>\n'
     line += '</table>'
+    close_db(connector)
     return line
 
 
 # получить таблицу с заданиями из соревнования competition_name
-def tasks_table(competition_name):
-    from os import listdir
-    tasks = sorted(listdir('../competitions/' + competition_name + '/tasks'))
+def tasks_table(competition_id):
+    connector, cursor = open_db()
+    cursor.execute('SELECT * FROM Tasks WHERE competition_id = ?', (competition_id,))
+    tasks = cursor.fetchall()
     line = '<table>\n'
     for c in tasks:
-        if not c.startswith('.'):
-            line += '<tr><td><a href="http://127.0.0.1:8000/task/' + competition_name + '/' + c + '">' + c + \
-                    '</td></tr>\n'
+        line += '<tr><td><a href="http://127.0.0.1:8000/task?task_id=' + str(c[0]) + '">' + c[1] + \
+                '</td></tr>\n'
     line += '</table>'
     return line
 
 
-def task_solutions_table(username, competition_name, task_name):
-    connector = connect('db.sqlite3')
-    cursor = connector.cursor()
-    cursor.execute('SELECT * FROM Solutions WHERE competition = ? AND task = ? AND username = ?', (competition_name, task_name, username))
+def task_solutions_table(task_id, username):
+    connector, cursor = open_db()
+    cursor.execute('SELECT * FROM Solutions WHERE task_id = ? AND username = ?', (task_id, username))
     solution_list = cursor.fetchall()
-    cursor.close()
-    connector.close()
-    table = '<tr><td><b>Id</b></td><td><b>Соревнование</b></td><td><b>Таск</b></td><td><b>Вердикт</b></td></tr>'
+    close_db(connector)
+    table = '<tr><td><b>Id</b></td><td><b>Вердикт</b></td></tr>'
     for solution in reversed(solution_list):
         table += '<tr>\n'
-        for i in 0, 1, 2, 4:
+        for i in 0, 3:
             table += '<td>' + str(solution[i]) + '</td>\n'
         table += '</tr>\n'
     return table
-
-
-# считать информацию из файла с входными выходными данными или легендой
-def get_info(competition_name, task_name, filename):
-    return '<br />'.join(open('../competitions/' + competition_name + '/tasks/' + task_name + '/' + filename + '.txt')
-                         .readlines())
-
-
-def write_info(competition_name, task_name, filename, text):
-    with open('../competitions/' + competition_name + '/tasks/' + task_name + '/' + filename + '.txt', 'w') as fs:
-        fs.write(text)
 
 
 ########################################################################################################################
@@ -358,61 +364,67 @@ def redirect(request):
     return HttpResponseRedirect('/main')
 
 
-
-
-
-def competition(request, name):
+def competition(request):
     check_login(request)
+    connector, cursor = open_db()
+    cursor.execute('SELECT competition_name FROM Competitions WHERE id = ?', (request.GET['competition_id'],))
+    name = cursor.fetchone()[0]
     if request.user.is_staff:
-        return render(request, "admin/competition.html", context={"name": name, 'tasks': tasks_table(name)})
+        return render(request, "admin/competition.html", context={"name": name,
+                                                                  'tasks': tasks_table(request.GET['competition_id'])})
     else:
-        return render(request, "competitor/competition.html", context={"name": name, 'tasks': tasks_table(name)})
+        return render(request, "competitor/competition.html", context={"name": name,
+                                                                       'tasks': tasks_table(request.GET['competition_id'])})
 
 
-def task(request, competition_name, task_name):
+def task(request):
     check_login(request)
+    connector, cursor = open_db()
+    cursor.execute('SELECT * FROM Tasks WHERE id = ?', (request.GET['task_id'],))
+    this_task = cursor.fetchone()
+    cursor.execute('SELECT competition_name FROM Competitions WHERE id = ?', (this_task[2],))
+    competition_name = cursor.fetchone()[0]
+    close_db(connector)
     if request.method == 'GET':
         context = {
             'competition_name': competition_name,
-            'task_name': task_name,
-            'legend': get_info(competition_name, task_name, 'legend'),
-            'input': get_info(competition_name, task_name, 'input'),
-            'output': get_info(competition_name, task_name, 'output'),
-            'specifications': get_info(competition_name, task_name, 'specifications'),
+            'task_name': this_task[1],
+            'legend': this_task[3],
+            'input': this_task[4],
+            'output': this_task[5],
+            'specifications': this_task[6],
             'form': forms.FileForm(),
-            'solutions': task_solutions_table(request.user.username, competition_name, task_name)
+            'solutions': task_solutions_table(this_task[0], request.user.username),
+            'competition_id': this_task[2]
         }
         if request.user.is_staff:
             return render(request, "admin/task.html", context=context)
         else:
             return render(request, "competitor/task.html", context=context)
     else:
-        form = forms.FileForm(request.POST, request.FILES)
         if 'file' in request.FILES.keys():
-            from os import mkdir, remove, rmdir
             file = request.FILES['file']
-            this_directory = '../competitions/' + competition_name + '/solutions/' + task_name + '/'
-            index = current_index()
-            with open(this_directory + str(index) + '.zip', 'wb') as fs:
+            this_directory = '../data/solutions/'
+            connector, cursor = open_db()
+            cursor.execute('SELECT * FROM Solutions')
+            all = cursor.fetchall()
+            index = all[-1][0] + 1 if all else 1
+            cursor.execute("INSERT INTO Solutions VALUES (?, ?, ?, 'TESTING')",
+                           (index, this_task[0], request.user.username))
+            connector.commit()
+            solution_dir = this_directory + str(index) + '/'
+            from os import system
+            system('mkdir ' + solution_dir)
+            with open(solution_dir + 'solution.zip', 'wb') as fs:
                 for chunk in file.chunks():
                     fs.write(chunk)
-            from os import remove
-            with zf(this_directory + str(index) + '.zip') as obj:
-                obj.extractall(this_directory + str(index) + '/')
-            remove(this_directory + str(index) + '.zip')
-            connector = connect('db.sqlite3')
-            cursor = connector.cursor()
-            cursor.execute("INSERT INTO Solutions VALUES (?, ?, ?, ?, ?)", (index,
-                                                                         competition_name,
-                                                                         task_name,
-                                                                         request.user.username,
-                                                                            'TESTING'))
-            connector.commit()
-            cursor.close()
-            connector.close()
+            from os import remove, listdir
+            with zf(solution_dir + 'solution.zip') as obj:
+                obj.extractall(solution_dir)
+            remove(solution_dir + 'solution.zip')
             from contest.TesterGlobal import TesterGlobal
-            TesterGlobal(competition_name, task_name, index, 3000).start()
-        return HttpResponseRedirect('/task/' + competition_name + '/' + task_name)
+            TesterGlobal(index, this_task[0], this_task[1], request.user.username, 3000).start()
+        return HttpResponseRedirect('/task?task_id=' + str(this_task[0]))
 
 
 def settings(request):
@@ -461,7 +473,6 @@ def reset(request):
     cursor.execute('DROP TABLE IF EXISTS Solutions;')
     cursor.execute('DROP TABLE IF EXISTS Competitions;')
     cursor.execute('DROP TABLE IF EXISTS Tasks;')
-    cursor.execute('DROP TABLE IF EXISTS Tests;')
     cursor.execute(
         '''
         CREATE TABLE Solutions(
@@ -476,7 +487,7 @@ def reset(request):
         '''
         CREATE TABLE Competitions(
             id INTEGER PRIMARY KEY AUTOINCREMENT,
-            name TEXT
+            competition_name TEXT
         );
         '''
     )
@@ -484,21 +495,13 @@ def reset(request):
         '''
         CREATE TABLE Tasks(
             id INTEGER PRIMARY KEY AUTOINCREMENT,
-            name TEXT,
-            solution_id INTEGER,
+            task_name TEXT,
+            competition_id INTEGER,
             legend TEXT,
             input TEXT,
             output TEXT,
             specifications TEXT,
             tests_uploaded INTEGER
-        );
-        '''
-    )
-    cursor.execute(
-        '''
-        CREATE TABLE Tests(
-            id INTEGER PRIMARY KEY AUTOINCREMENT,
-            task_id INTEGER
         );
         '''
     )

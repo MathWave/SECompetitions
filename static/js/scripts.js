@@ -16,21 +16,21 @@ function admin() {
 function new_competition() {
 	window.location.href = 'http://127.0.0.1:8000/admin/new_competition'
 }
-function new_task(competition_name) {
-	window.location.href = 'http://127.0.0.1:8000/admin/new_task/' + competition_name
+function new_task(competition_id) {
+	window.location.href = 'http://127.0.0.1:8000/admin/new_task?competition_id=' + competition_id
 }
-function solutions(competition_name) {
-	window.location.href = 'http://127.0.0.1:8000/admin/solutions/' + competition_name
+function solutions(competition_id) {
+	window.location.href = 'http://127.0.0.1:8000/admin/solutions?competition_id=' + competition_id
 }
-function delete_solution(competition_name) {
+function delete_solution(competition_id) {
 	let del = confirm("Точно удаляем?");
-	if (del) window.location.href = 'http://127.0.0.1:8000/admin/delete_competition/' + competition_name
+	if (del) window.location.href = 'http://127.0.0.1:8000/admin/delete_competition?competition_id=' + competition_id
 }
-function delete_task(competition_name, task_name) {
+function delete_task(task_id) {
 	let del = confirm("Точно удаляем?");
-	if (del) window.location.href = 'http://127.0.0.1:8000/admin/delete_task/' + competition_name + '/' + task_name
+	if (del) window.location.href = 'http://127.0.0.1:8000/admin/delete_task?task_id=' + task_id
 }
-function remove_tests(competition_name, task_name) {
+function remove_tests(task_id) {
 	let del = confirm("Точно удаляем?");
-	if (del) window.location.href = 'http://127.0.0.1:8000/admin/remove_tests/' + competition_name + '/' + task_name
+	if (del) window.location.href = 'http://127.0.0.1:8000/admin/remove_tests?task_id=' + task_id
 }

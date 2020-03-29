@@ -20,14 +20,14 @@
         {% endautoescape %}
     </div>
     <div>
-        <input type="submit" class="enter_simple" onclick="new_task('{{ name }}')" value="Добавить таск">
+        <input type="submit" class="enter_simple" onclick="new_task({{ competition_id }})" value="Добавить таск">
     </div>
     <div>
         <div style="text-align: center;">
-            <input type="submit" class="enter_simple" onclick="solutions('{{ name }}')" value="Посмотреть посылки">
+            <input type="submit" class="enter_simple" onclick="solutions({{ competition_id }})" value="Посмотреть посылки">
         </div>
         <div style="text-align: center;">
-            <input type="submit" class="enter_simple" onclick="delete_solution('{{ name }}')" value="Удалить соревнование">
+            <input type="submit" class="enter_simple" onclick="delete_solution({{ competition_id }})" value="Удалить соревнование">
         </div>
     </div>
 </body>

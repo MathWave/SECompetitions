@@ -4,8 +4,16 @@
     <list default="true" id="df440fb9-1a96-4034-ae0e-83ac9dcfeb0a" name="Default Changelist" comment="">
       <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/SECompetitions/urls.py" beforeDir="false" afterPath="$PROJECT_DIR$/SECompetitions/urls.py" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/contest/Tester.py" beforeDir="false" afterPath="$PROJECT_DIR$/contest/Tester.py" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/contest/TesterGlobal.py" beforeDir="false" afterPath="$PROJECT_DIR$/contest/TesterGlobal.py" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/contest/views.py" beforeDir="false" afterPath="$PROJECT_DIR$/contest/views.py" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/db.sqlite3" beforeDir="false" afterPath="$PROJECT_DIR$/db.sqlite3" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/static/js/scripts.js" beforeDir="false" afterPath="$PROJECT_DIR$/static/js/scripts.js" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/templates/admin/competitions_settings.html" beforeDir="false" afterPath="$PROJECT_DIR$/templates/admin/competitions_settings.html" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/templates/admin/solutions.html" beforeDir="false" afterPath="$PROJECT_DIR$/templates/admin/solutions.html" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/templates/admin/task.html" beforeDir="false" afterPath="$PROJECT_DIR$/templates/admin/task.html" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/templates/admin/task_settings.html" beforeDir="false" afterPath="$PROJECT_DIR$/templates/admin/task_settings.html" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/templates/competitor/task.html" beforeDir="false" afterPath="$PROJECT_DIR$/templates/competitor/task.html" afterDir="false" />
     </list>
     <option name="EXCLUDED_CONVERTED_TO_IGNORED" value="true" />
     <option name="SHOW_DIALOG" value="false" />
@@ -160,7 +168,11 @@
       <workItem from="1585075026579" duration="3671000" />
       <workItem from="1585120003436" duration="546000" />
       <workItem from="1585132683951" duration="499000" />
-      <workItem from="1585149482854" duration="3438000" />
+      <workItem from="1585149482854" duration="29399000" />
+      <workItem from="1585301184648" duration="2629000" />
+      <workItem from="1585329383457" duration="8260000" />
+      <workItem from="1585403088914" duration="5348000" />
+      <workItem from="1585412069259" duration="22766000" />
     </task>
     <task id="LOCAL-00001" summary="Отправка условий контеста происходит через формы">
       <created>1582733624850</created>
@@ -204,7 +216,14 @@
       <option name="project" value="LOCAL" />
       <updated>1585080317216</updated>
     </task>
-    <option name="localTasksCounter" value="7" />
+    <task id="LOCAL-00007" summary="Начало переезда на бд">
+      <created>1585153730456</created>
+      <option name="number" value="00007" />
+      <option name="presentableId" value="LOCAL-00007" />
+      <option name="project" value="LOCAL" />
+      <updated>1585153730456</updated>
+    </task>
+    <option name="localTasksCounter" value="8" />
     <servers />
   </component>
   <component name="TypeScriptGeneratedFilesManager">
@@ -230,25 +249,16 @@
     <MESSAGE value="Добавлена возможность удалять соревнования и таски" />
     <MESSAGE value="Много всего добавил" />
     <MESSAGE value="Теперь тестирует&#10;Есть четыре вердикта: passed, failed, compilation error и time limit" />
-    <option name="LAST_COMMIT_MESSAGE" value="Теперь тестирует&#10;Есть четыре вердикта: passed, failed, compilation error и time limit" />
+    <MESSAGE value="Начало переезда на бд" />
+    <option name="LAST_COMMIT_MESSAGE" value="Начало переезда на бд" />
   </component>
   <component name="XDebuggerManager">
     <breakpoint-manager>
       <breakpoints>
         <line-breakpoint enabled="true" suspend="THREAD" type="python-line">
-          <url>file://$PROJECT_DIR$/contest/Tester.py</url>
-          <line>52</line>
-          <option name="timeStamp" value="7" />
-        </line-breakpoint>
-        <line-breakpoint enabled="true" suspend="THREAD" type="python-line">
-          <url>file://$PROJECT_DIR$/contest/Tester.py</url>
-          <line>16</line>
-          <option name="timeStamp" value="8" />
-        </line-breakpoint>
-        <line-breakpoint enabled="true" suspend="THREAD" type="python-line">
           <url>file://$PROJECT_DIR$/contest/views.py</url>
-          <line>331</line>
-          <option name="timeStamp" value="10" />
+          <line>182</line>
+          <option name="timeStamp" value="31" />
         </line-breakpoint>
       </breakpoints>
     </breakpoint-manager>

@@ -1,76 +1,31 @@
 from threading import Thread
-from sqlite3 import connect
 
 
-def is_project(path):
-    from os import listdir
-    from os.path import abspath
-    for file in listdir(abspath(path)):
-        if '.csproj' in file:
-            return True
-    return False
-
-
-def build_and_copy(path):
+def test(solution_id, task_id, working_dir):
     from os import system
-    from os.path import abspath, dirname, exists, join
-    name = path.split('/')[-1]
-    del_cmd = 'rm -r ' + path + '/bin/Debug'
-    system(del_cmd)
-    system('xbuild ' + path + '/' + name + '.csproj /p:Configuration=Debug')
-    for file in name + '.exe', name + '.pdb':
-        if exists(join(path, 'bin/Debug', file)):
-            system('cp -r ' + path + '/bin/Debug/' + file + ' ' + abspath(dirname(abspath(path))) + '/Tests/bin/Debug')
-        else:
-            return False
-    return True
-
-
-def test(competition, task, id):
-    sln_path = '../competitions/' + competition + '/solutions/' + task + '/' + str(id) + ('/' + task) * 2 + '.sln'
-    solution_path = '../competitions/' + competition + '/solutions/' + task + '/' + str(id) + '/' + task
-    proj_path = '../competitions/' + competition + '/tasks/' + task + '/tests/Tests'
-    from os import system, listdir
-    from os.path import join, abspath, dirname, isdir
-    cp_command = 'cp -r ' + proj_path + ' ' + dirname(sln_path)
-    system(cp_command)
-    for project in listdir(solution_path):
-        project = join(solution_path, project)
-        if isdir(project) and project.split('/')[-1] != 'Tests' and is_project(project):
-            if not build_and_copy(project):
-                connector = connect('db.sqlite3')
-                cursor = connector.cursor()
-                cursor.execute("UPDATE Solutions SET result = 'Compilation error' WHERE id = ?;", (id,))
-                connector.commit()
-                cursor.close()
-                connector.close()
-                return
-    test_cmd = '(cd ' + solution_path + ' && ' + \
-               'mono ../../../../../../SECompetitions/nunit_console/tools/nunit3-console.exe ' + \
-               '/'.join((dirname(sln_path) + '/' + proj_path.split('/')[-1]).split('/')[7:]) + '/bin/Debug/Tests.dll)'
+    from os.path import join
+    from contest.views import open_db, close_db
+    test_cmd = '(cd ' + working_dir + ' && ' + \
+               'mono ../../../../../SECompetitions/nunit_console/tools/nunit3-console.exe ' + \
+               str(task_id) + '.dll)'
     system(test_cmd)
     from xml.dom.minidom import parse
-    doc = parse(join(solution_path, 'TestResult.xml'))
+    doc = parse(join(working_dir, 'TestResult.xml'))
     res = doc.getElementsByTagName('test-suite')[0].getAttribute('result')
-    connector = connect('db.sqlite3')
-    cursor = connector.cursor()
-    cursor.execute("UPDATE Solutions SET result = ? WHERE id = ?;", (res, id))
-    connector.commit()
-    cursor.close()
-    connector.close()
-    a = 5
-    a += 1
+    connector, cursor = open_db()
+    cursor.execute("UPDATE Solutions SET result = ? WHERE id = ?;", (res, solution_id))
+    close_db(connector)
 
 
 class Tester(Thread):
-    def __init__(self, competition_name, task_name, index):
+    def __init__(self, solution_id, task_id, working_dir):
         Thread.__init__(self)
-        self.competition_name = competition_name
-        self.task_name = task_name
-        self.index = index
+        self.solution_id = solution_id
+        self.task_id = task_id
+        self.working_dir = working_dir
 
     def run(self):
-        test(self.competition_name, self.task_name, self.index)
+        test(self.solution_id, self.task_id, self.working_dir)
 
 
 ########################################################################################################################
