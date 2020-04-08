@@ -23,6 +23,8 @@ urlpatterns = [
     path('admin/delete_task', views.admin_delete_task),
     path('admin/remove_tests', views.admin_remove_tests),
 
+    path('superuser/main', views.superuser),
+
     path('create_user/<username>/<password>', views.create_user),
     path('reset', views.reset),
     re_path('^', views.redirect)

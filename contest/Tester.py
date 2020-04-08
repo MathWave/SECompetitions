@@ -2,19 +2,22 @@ from threading import Thread
 
 
 def test(solution_id, task_id, working_dir):
-    from os import system
+    from subprocess import Popen
     from os.path import join
-    from contest.views import open_db, close_db
+    from contest.methods import open_db, close_db
     test_cmd = '(cd ' + working_dir + ' && ' + \
                'mono ../../../../../SECompetitions/nunit_console/tools/nunit3-console.exe ' + \
                str(task_id) + '.dll)'
-    system(test_cmd)
+    p = Popen(test_cmd, shell=True)
+    p.wait()
+    p.kill()
     from xml.dom.minidom import parse
     doc = parse(join(working_dir, 'TestResult.xml'))
     res = doc.getElementsByTagName('test-suite')[0].getAttribute('result')
     connector, cursor = open_db()
     cursor.execute("UPDATE Solutions SET result = ? WHERE id = ?;", (res, solution_id))
     close_db(connector)
+    a = 5
 
 
 class Tester(Thread):

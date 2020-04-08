@@ -34,3 +34,6 @@ function remove_tests(task_id) {
 	let del = confirm("Точно удаляем?");
 	if (del) window.location.href = 'http://127.0.0.1:8000/admin/remove_tests?task_id=' + task_id
 }
+function god_mode() {
+	window.location.href = 'http://127.0.0.1:8000/superuser/main'
+}

@@ -5,10 +5,15 @@
 	<head>
 		<meta http-equiv="Content-Type" content="text/html; charset=utf-8">
 		<title>
-			Админка
+			Режим Бога
 		</title>
 		<link rel="stylesheet" type="text/css" href={% static "css/styles.css" %}>
 		<script type="text/javascript" src={% static "js/scripts.js" %}></script>
+        <style>
+            td {
+                padding-left: 15px;
+            }
+        </style>
 	</head>
 	<body>
 		<div>
@@ -16,20 +21,15 @@
             <hr>
         </div>
         <div>
-            <h1>Доступные соревнования</h1>
+            <h1>Пользователи</h1>
             {% autoescape off %}
-                {{ competitions }}
+                <form method="POST">
+                    {% csrf_token %}
+                    <table border="1px solid black">
+                        {{ table }}
+                    </table>
+                </form>
             {% endautoescape %}
-        </div>
-        <div>
-            <input type="submit" class="enter_simple" onclick="new_competition()" value="Создать новое соревнование">
-        </div>
-        <div>
-            {% if is_superuser %}
-                <center>
-                    <input type="submit" class="enter_simple" onclick="god_mode()" value="Режим Бога">
-                </center>
-            {% endif %}
         </div>
 	</body>
 </html>

@@ -2,20 +2,20 @@
 <project version="4">
   <component name="ChangeListManager">
     <list default="true" id="df440fb9-1a96-4034-ae0e-83ac9dcfeb0a" name="Default Changelist" comment="">
+      <change afterPath="$PROJECT_DIR$/contest/methods.py" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/templates/superuser/superuser.html" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/SECompetitions/settings.py" beforeDir="false" afterPath="$PROJECT_DIR$/SECompetitions/settings.py" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/SECompetitions/urls.py" beforeDir="false" afterPath="$PROJECT_DIR$/SECompetitions/urls.py" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/contest/Tester.py" beforeDir="false" afterPath="$PROJECT_DIR$/contest/Tester.py" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/contest/TesterGlobal.py" beforeDir="false" afterPath="$PROJECT_DIR$/contest/TesterGlobal.py" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/contest/views.py" beforeDir="false" afterPath="$PROJECT_DIR$/contest/views.py" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/db.sqlite3" beforeDir="false" afterPath="$PROJECT_DIR$/db.sqlite3" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/static/js/scripts.js" beforeDir="false" afterPath="$PROJECT_DIR$/static/js/scripts.js" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/templates/admin/competitions_settings.html" beforeDir="false" afterPath="$PROJECT_DIR$/templates/admin/competitions_settings.html" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/templates/admin/solutions.html" beforeDir="false" afterPath="$PROJECT_DIR$/templates/admin/solutions.html" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/templates/admin/task.html" beforeDir="false" afterPath="$PROJECT_DIR$/templates/admin/task.html" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/templates/admin/task_settings.html" beforeDir="false" afterPath="$PROJECT_DIR$/templates/admin/task_settings.html" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/templates/competitor/task.html" beforeDir="false" afterPath="$PROJECT_DIR$/templates/competitor/task.html" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/templates/admin/admin.html" beforeDir="false" afterPath="$PROJECT_DIR$/templates/admin/admin.html" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/templates/admin/show_file.html" beforeDir="false" afterPath="$PROJECT_DIR$/templates/admin/show_file.html" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/templates/admin/solution.html" beforeDir="false" afterPath="$PROJECT_DIR$/templates/admin/solution.html" afterDir="false" />
     </list>
-    <option name="EXCLUDED_CONVERTED_TO_IGNORED" value="true" />
     <option name="SHOW_DIALOG" value="false" />
     <option name="HIGHLIGHT_CONFLICTS" value="true" />
     <option name="HIGHLIGHT_NON_ACTIVE_CHANGELIST" value="false" />
@@ -51,6 +51,11 @@
   </component>
   <component name="ProjectId" id="1XvNhC8Hqzokw5OERWfeBrjKtwQ" />
   <component name="ProjectLevelVcsManager" settingsEditedManually="true" />
+  <component name="ProjectViewState">
+    <option name="hideEmptyMiddlePackages" value="true" />
+    <option name="showExcludedFiles" value="true" />
+    <option name="showLibraryContents" value="true" />
+  </component>
   <component name="PropertiesComponent">
     <property name="DefaultHtmlFileTemplate" value="HTML File" />
     <property name="SHARE_PROJECT_CONFIGURATION_FILES" value="true" />
@@ -68,18 +73,6 @@
       <recent name="$PROJECT_DIR$/templates/admin" />
     </key>
   </component>
-  <component name="RunDashboard">
-    <option name="ruleStates">
-      <list>
-        <RuleState>
-          <option name="name" value="ConfigurationTypeDashboardGroupingRule" />
-        </RuleState>
-        <RuleState>
-          <option name="name" value="StatusDashboardGroupingRule" />
-        </RuleState>
-      </list>
-    </option>
-  </component>
   <component name="RunManager">
     <configuration name="SECompetitions" type="Python.DjangoServer" factoryName="Django server">
       <module name="SECompetitions" />
@@ -89,7 +82,7 @@
         <env name="PYTHONUNBUFFERED" value="1" />
         <env name="DJANGO_SETTINGS_MODULE" value="SECompetitions.settings" />
       </envs>
-      <option name="SDK_HOME" value="" />
+      <option name="SDK_HOME" value="/usr/local/bin/python3.7" />
       <option name="WORKING_DIRECTORY" value="" />
       <option name="IS_MODULE_SDK" value="false" />
       <option name="ADD_CONTENT_ROOTS" value="true" />
@@ -172,7 +165,25 @@
       <workItem from="1585301184648" duration="2629000" />
       <workItem from="1585329383457" duration="8260000" />
       <workItem from="1585403088914" duration="5348000" />
-      <workItem from="1585412069259" duration="22766000" />
+      <workItem from="1585412069259" duration="23351000" />
+      <workItem from="1585496622721" duration="8904000" />
+      <workItem from="1585565367840" duration="821000" />
+      <workItem from="1585572540665" duration="329000" />
+      <workItem from="1585583234430" duration="4361000" />
+      <workItem from="1585651565359" duration="480000" />
+      <workItem from="1585756794996" duration="9076000" />
+      <workItem from="1585816447850" duration="183000" />
+      <workItem from="1585822191491" duration="2113000" />
+      <workItem from="1585850988313" duration="987000" />
+      <workItem from="1585942490649" duration="30000" />
+      <workItem from="1586122507714" duration="128000" />
+      <workItem from="1586123006143" duration="23000" />
+      <workItem from="1586123042983" duration="749000" />
+      <workItem from="1586351308961" duration="3018000" />
+      <workItem from="1586358340523" duration="4371000" />
+      <workItem from="1586364998671" duration="2338000" />
+      <workItem from="1586371883017" duration="2753000" />
+      <workItem from="1586376313313" duration="576000" />
     </task>
     <task id="LOCAL-00001" summary="Отправка условий контеста происходит через формы">
       <created>1582733624850</created>
@@ -223,7 +234,14 @@
       <option name="project" value="LOCAL" />
       <updated>1585153730456</updated>
     </task>
-    <option name="localTasksCounter" value="8" />
+    <task id="LOCAL-00008" summary="Переехали на бд, вроде все работает">
+      <created>1585480588658</created>
+      <option name="number" value="00008" />
+      <option name="presentableId" value="LOCAL-00008" />
+      <option name="project" value="LOCAL" />
+      <updated>1585480588658</updated>
+    </task>
+    <option name="localTasksCounter" value="9" />
     <servers />
   </component>
   <component name="TypeScriptGeneratedFilesManager">
@@ -250,17 +268,91 @@
     <MESSAGE value="Много всего добавил" />
     <MESSAGE value="Теперь тестирует&#10;Есть четыре вердикта: passed, failed, compilation error и time limit" />
     <MESSAGE value="Начало переезда на бд" />
-    <option name="LAST_COMMIT_MESSAGE" value="Начало переезда на бд" />
+    <MESSAGE value="Переехали на бд, вроде все работает" />
+    <option name="LAST_COMMIT_MESSAGE" value="Переехали на бд, вроде все работает" />
+  </component>
+  <component name="WindowStateProjectService">
+    <state x="304" y="187" width="1071" height="734" key="#com.intellij.execution.impl.EditConfigurationsDialog" timestamp="1586363060699">
+      <screen x="0" y="0" width="1680" height="1050" />
+    </state>
+    <state x="304" y="187" width="1071" height="734" key="#com.intellij.execution.impl.EditConfigurationsDialog/0.0.1680.1050@0.0.1680.1050" timestamp="1586123305404" />
+    <state x="304" y="187" key="#com.intellij.execution.impl.EditConfigurationsDialog/1680.-157.1920.1057/0.0.1680.1050@0.0.1680.1050" timestamp="1586362591614" />
+    <state x="304" y="187" key="#com.intellij.execution.impl.EditConfigurationsDialog/1680.-180.1920.1080/0.0.1680.1050@0.0.1680.1050" timestamp="1586363060699" />
+    <state x="528" y="260" key="#com.intellij.openapi.updateSettings.impl.PluginUpdateInfoDialog" timestamp="1586123018060">
+      <screen x="0" y="0" width="1680" height="1050" />
+    </state>
+    <state x="528" y="260" key="#com.intellij.openapi.updateSettings.impl.PluginUpdateInfoDialog/0.0.1680.1050@0.0.1680.1050" timestamp="1586123018060" />
+    <state width="1638" height="228" key="GridCell.Tab.0.bottom" timestamp="1586376647597">
+      <screen x="0" y="0" width="1680" height="1050" />
+    </state>
+    <state width="1638" height="262" key="GridCell.Tab.0.bottom/1680.-157.1920.1057/0.0.1680.1050@0.0.1680.1050" timestamp="1586370119322" />
+    <state width="1638" height="228" key="GridCell.Tab.0.bottom/1680.-180.1920.1080/0.0.1680.1050@0.0.1680.1050" timestamp="1586376647597" />
+    <state width="1638" height="228" key="GridCell.Tab.0.center" timestamp="1586376647595">
+      <screen x="0" y="0" width="1680" height="1050" />
+    </state>
+    <state width="1638" height="262" key="GridCell.Tab.0.center/1680.-157.1920.1057/0.0.1680.1050@0.0.1680.1050" timestamp="1586370119321" />
+    <state width="1638" height="228" key="GridCell.Tab.0.center/1680.-180.1920.1080/0.0.1680.1050@0.0.1680.1050" timestamp="1586376647595" />
+    <state width="1638" height="228" key="GridCell.Tab.0.left" timestamp="1586376647594">
+      <screen x="0" y="0" width="1680" height="1050" />
+    </state>
+    <state width="1638" height="262" key="GridCell.Tab.0.left/1680.-157.1920.1057/0.0.1680.1050@0.0.1680.1050" timestamp="1586370119321" />
+    <state width="1638" height="228" key="GridCell.Tab.0.left/1680.-180.1920.1080/0.0.1680.1050@0.0.1680.1050" timestamp="1586376647594" />
+    <state width="1638" height="228" key="GridCell.Tab.0.right" timestamp="1586376647596">
+      <screen x="0" y="0" width="1680" height="1050" />
+    </state>
+    <state width="1638" height="262" key="GridCell.Tab.0.right/1680.-157.1920.1057/0.0.1680.1050@0.0.1680.1050" timestamp="1586370119321" />
+    <state width="1638" height="228" key="GridCell.Tab.0.right/1680.-180.1920.1080/0.0.1680.1050@0.0.1680.1050" timestamp="1586376647596" />
+    <state width="1638" height="262" key="GridCell.Tab.1.bottom" timestamp="1586376597687">
+      <screen x="0" y="0" width="1680" height="1050" />
+    </state>
+    <state width="1638" height="262" key="GridCell.Tab.1.bottom/1680.-157.1920.1057/0.0.1680.1050@0.0.1680.1050" timestamp="1586370119325" />
+    <state width="1638" height="235" key="GridCell.Tab.1.bottom/1680.-157.1920.1057/0.23.1680.945@0.23.1680.945" timestamp="1586355813965" />
+    <state width="1638" height="262" key="GridCell.Tab.1.bottom/1680.-180.1920.1080/0.0.1680.1050@0.0.1680.1050" timestamp="1586376597687" />
+    <state width="1638" height="262" key="GridCell.Tab.1.center" timestamp="1586376597686">
+      <screen x="0" y="0" width="1680" height="1050" />
+    </state>
+    <state width="1638" height="262" key="GridCell.Tab.1.center/1680.-157.1920.1057/0.0.1680.1050@0.0.1680.1050" timestamp="1586370119324" />
+    <state width="1638" height="235" key="GridCell.Tab.1.center/1680.-157.1920.1057/0.23.1680.945@0.23.1680.945" timestamp="1586355813964" />
+    <state width="1638" height="262" key="GridCell.Tab.1.center/1680.-180.1920.1080/0.0.1680.1050@0.0.1680.1050" timestamp="1586376597686" />
+    <state width="1638" height="262" key="GridCell.Tab.1.left" timestamp="1586376597685">
+      <screen x="0" y="0" width="1680" height="1050" />
+    </state>
+    <state width="1638" height="262" key="GridCell.Tab.1.left/1680.-157.1920.1057/0.0.1680.1050@0.0.1680.1050" timestamp="1586370119323" />
+    <state width="1638" height="235" key="GridCell.Tab.1.left/1680.-157.1920.1057/0.23.1680.945@0.23.1680.945" timestamp="1586355813963" />
+    <state width="1638" height="262" key="GridCell.Tab.1.left/1680.-180.1920.1080/0.0.1680.1050@0.0.1680.1050" timestamp="1586376597685" />
+    <state width="1638" height="262" key="GridCell.Tab.1.right" timestamp="1586376597687">
+      <screen x="0" y="0" width="1680" height="1050" />
+    </state>
+    <state width="1638" height="262" key="GridCell.Tab.1.right/1680.-157.1920.1057/0.0.1680.1050@0.0.1680.1050" timestamp="1586370119324" />
+    <state width="1638" height="235" key="GridCell.Tab.1.right/1680.-157.1920.1057/0.23.1680.945@0.23.1680.945" timestamp="1586355813964" />
+    <state width="1638" height="262" key="GridCell.Tab.1.right/1680.-180.1920.1080/0.0.1680.1050@0.0.1680.1050" timestamp="1586376597687" />
   </component>
   <component name="XDebuggerManager">
     <breakpoint-manager>
       <breakpoints>
         <line-breakpoint enabled="true" suspend="THREAD" type="python-line">
           <url>file://$PROJECT_DIR$/contest/views.py</url>
-          <line>182</line>
-          <option name="timeStamp" value="31" />
+          <line>336</line>
+          <option name="timeStamp" value="1" />
+        </line-breakpoint>
+        <line-breakpoint enabled="true" suspend="THREAD" type="python-line">
+          <url>file://$PROJECT_DIR$/contest/views.py</url>
+          <line>320</line>
+          <option name="timeStamp" value="2" />
+        </line-breakpoint>
+        <line-breakpoint enabled="true" suspend="THREAD" type="python-line">
+          <url>file://$PROJECT_DIR$/contest/TesterGlobal.py</url>
+          <line>56</line>
+          <option name="timeStamp" value="22" />
         </line-breakpoint>
       </breakpoints>
+      <default-breakpoints>
+        <breakpoint type="python-exception">
+          <properties notifyOnTerminate="true" exception="BaseException">
+            <option name="notifyOnTerminate" value="true" />
+          </properties>
+        </breakpoint>
+      </default-breakpoints>
     </breakpoint-manager>
   </component>
 </project>

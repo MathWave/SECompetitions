@@ -1,14 +1,12 @@
 from django.shortcuts import render
 from django.http import HttpResponse, HttpResponseRedirect
-from django.template import Context, loader
 from contest import forms
 from django.contrib.auth.models import User
-from django.contrib.auth import authenticate
-from django.contrib.auth import login, logout
+from django.contrib.auth import authenticate, login, logout
 from sqlite3 import connect
 from zipfile import ZipFile as zf
 from urllib.request import quote
-from threading import Thread
+from contest.methods import open_db, close_db
 
 
 ########################################################################################################################
@@ -25,15 +23,70 @@ def check_admin(request):
         return HttpResponseRedirect('/enter')
 
 
-def open_db():
-    connector = connect('db.sqlite3')
-    cursor = connector.cursor()
-    return connector, cursor
+def check_superuser(request):
+    check_admin(request)
+    if not request.user.is_superuser:
+        return HttpResponseRedirect('/enter')
 
 
-def close_db(connector):
-    connector.commit()
-    connector.close()
+def has_permission(username, competition_id):
+    connector, cursor = open_db()
+    cursor.execute('SELECT * FROM Permissons WHERE username = ? AND competition_id = ?', (username, competition_id))
+    out = cursor.fetchall()
+    cursor.execute('SELECT * FROM user_auth WHERE username = ? AND is_superuser = 1', (username,))
+    is_superuser = len(cursor.fetchall()) != 0
+    close_db(connector)
+    return len(out) != 0 or is_superuser
+
+
+########################################################################################################################
+
+
+def users_sorting_key(x):
+    return ' '.join(x[0:3])
+
+
+def get_select(selected):
+    return '<select id="role" selected="' + selected + '">' \
+                                                       '<option value="user">Пользователь</option>' \
+                                                       '<option value="admin">Админ</option>' \
+                                                       '<option value="superuser">Бог</option></select>'
+
+
+def get_new_user_inputs():
+    values = ['surname', 'name', 'middle_name', 'droup_name', 'email']
+    line = '<tr>'
+    for val in values:
+        line += '<td><input type="text" name="' + val + '"></td>'
+    line += '<td>' + get_select('user') + '</td><td><input type="submit" value="Создать">'
+    return line
+
+
+def user_table():
+    columns_ru = ['Фамилия', 'Имя', 'Отчество', 'Группа', 'Почта', 'Роль']
+    line = '<tr>'
+    for c in columns_ru:
+        line += '<td><b>' + c + '</b></td>'
+    line += '<td></td></tr><tr>' + get_new_user_inputs() + '</tr>'
+    connector, cursor = open_db()
+    cursor.execute('SELECT * FROM Users')
+    users = cursor.fetchall()
+    close_db(connector)
+    for user in sorted(users, key=users_sorting_key):
+        line += '<tr>'
+        for i in range(0, 5):
+            line += '<td>' + user[i] + '</td>'
+        line += '<td>' + get_select(user[5]) + '</td>'
+        line += '</tr>'
+    return line
+
+
+def superuser(request):
+    check_superuser(request)
+    if request.method == 'GET':
+        return render(request, 'superuser/superuser.html', context={'table': user_table()})
+    else:
+        return HttpResponseRedirect('/main')
 
 
 ########################################################################################################################
@@ -46,7 +99,8 @@ def admin_competitions_table():
     comps = cursor.fetchall()
     line = '<table>\n'
     for c in comps:
-        line += '<tr><td><a href="http://127.0.0.1:8000/admin/competition?competition_id=' + str(c[0]) + '">' + c[1] + '</td></tr>\n'
+        line += '<tr><td><a href="http://127.0.0.1:8000/admin/competition?competition_id=' + str(c[0]) + '">' + c[
+            1] + '</td></tr>\n'
     line += '</table>'
     close_db(connector)
     return line
@@ -96,12 +150,12 @@ def admin_delete_task(request):
     solutions_ids = [s[0] for s in cursor.fetchall()]
     cursor.execute('DELETE FROM Solutions WHERE task_id = ?', (task_id,))
     cursor.execute('DELETE FROM Tasks WHERE id = ?', (task_id,))
-    cursor.execute('DELETE FROM Tests WHERE task_id = ?', (task_id,))
     close_db(connector)
-    from os import system
+    from shutil import rmtree
+    from os import remove
     for i in solutions_ids:
-        system('rm -r ../data/solutions/' + str(i))
-    system('rm -r ../data/tests/' + str(task_id) + '.dll')
+        rmtree('../data/solutions/' + str(i))
+    remove('../data/tests/' + str(task_id) + '.dll')
     return HttpResponseRedirect('/admin/competition?competition_id=' + str(competition_id))
 
 
@@ -111,15 +165,17 @@ def admin_delete_competition(request):
     connector, cursor = open_db()
     cursor.execute('SELECT * FROM Tasks WHERE competition_id = ?', (competition_id,))
     task_ids = [(i[0],) for i in cursor.fetchall()]
-    from os import system
+    from os import remove
+    from shutil import rmtree
     for i in task_ids:
         cursor.execute('SELECT * FROM Solutions WHERE task_id = ?;', i)
         for s in cursor.fetchall():
-            system('rm -r ../data/solutions/' + str(s[0]))
-        system('rm -r ../data/tests/' + str(i[0]) + '.dll')
+            rmtree('../data/solutions/' + str(s[0]))
+        remove('../data/tests/' + str(i[0]) + '.dll')
     cursor.executemany('DELETE FROM Solutions WHERE task_id = ?', task_ids)
     cursor.execute('DELETE FROM Tasks WHERE competition_id = ?', (competition_id,))
     cursor.execute('DELETE FROM Competitions WHERE id = ?', (competition_id,))
+    cursor.execute('DELETE FROM Permissions WHERE competition_id = ?', (competition_id,))
     close_db(connector)
     return HttpResponseRedirect('/admin/main')
 
@@ -147,14 +203,21 @@ def admin_show_file(request):
     competition = cursor.fetchone()[1]
     close_db(connector)
     rootdir = '../data/solutions/' + str(solution_id) + '/' + request.GET.get('file', '')
-    file = open(rootdir, 'r').read()
+    from os.path import dirname
+    folder = '/'.join(dirname(rootdir).split('/')[4:])
+    try:
+        file = open(rootdir, 'r').read()
+    except:
+        return HttpResponseRedirect('/admin/solution?solution_id=' + str(solution_id) + '&folder=' + folder)
     return render(request, 'admin/show_file.html', context={'competition': competition,
                                                             'task': task_info[1],
                                                             'username': info[2],
                                                             'id': solution_id,
                                                             'filename': rootdir.split('/')[-1],
                                                             'verdict': info[3],
-                                                            'text': file
+                                                            'text': file,
+                                                            'file': folder + '/' + rootdir.split('/')[-1],
+                                                            'folder': folder
                                                             })
 
 
@@ -168,6 +231,11 @@ def admin_solution(request):
     cursor.execute('SELECT * FROM Solutions WHERE id = ?', (solution_id,))
     info = cursor.fetchone()
     files = ''
+    if folder:
+        files += '<div><img src="http://icons.iconarchive.com/icons/icons8/ios7/16/Very-Basic-Opened-Folder-icon.png'
+        split_folder = folder.split('/')
+        files += '">    <a href=http://127.0.0.1:8000/admin/solution?solution_id=' + str(solution_id) + '&folder=' + \
+                 quote('/'.join(split_folder[0:len(split_folder) - 1]), safe='') + '>..</div>\n'
     from os import listdir
     from os.path import isfile, join
     rootdir = '../data/solutions/' + str(solution_id) + '/' + folder
@@ -193,7 +261,9 @@ def admin_solution(request):
                                                            'username': info[2],
                                                            'id': info[0],
                                                            'verdict': info[3],
-                                                           'files': files
+                                                           'files': files,
+                                                           'folder': 'root/' + folder,
+                                                           'competition_id': task_info[2]
                                                            })
 
 
@@ -265,13 +335,14 @@ def admin_task(request):
         from os import system
         if have_tests:
             file = request.FILES['tests']
+            cursor.execute('UPDATE Tasks SET tests_uploaded = 1 WHERE id = ?', (request.GET['task_id'],))
+            context['tests_uploaded'] = True
             test_file = '../data/tests/' + str(this_task[0]) + '.dll'
             system('touch ' + test_file)
             with open(test_file, 'wb+') as fs:
                 for chunk in file.chunks():
                     fs.write(chunk)
         close_db(connector)
-        return HttpResponseRedirect('/admin/task?task_id=' + str(this_task[0]))
     return render(request, 'admin/task_settings.html', context=context)
 
 
@@ -303,7 +374,8 @@ def admin_new_task(request):
 
 def admin_main(request):
     check_admin(request)
-    return render(request, "admin/admin.html", context={"competitions": admin_competitions_table()})
+    return render(request, "admin/admin.html", context={"competitions": admin_competitions_table(),
+                                                        'is_superuser': request.user.is_superuser})
 
 
 ########################################################################################################################
@@ -316,7 +388,8 @@ def competitions_table():
     comps = cursor.fetchall()
     line = '<table>\n'
     for c in comps:
-        line += '<tr><td><a href="http://127.0.0.1:8000/competition?competition_id=' + str(c[0]) + '">' + c[1] + '</td></tr>\n'
+        line += '<tr><td><a href="http://127.0.0.1:8000/competition?competition_id=' + str(c[0]) + '">' + c[
+            1] + '</td></tr>\n'
     line += '</table>'
     close_db(connector)
     return line
@@ -374,7 +447,8 @@ def competition(request):
                                                                   'tasks': tasks_table(request.GET['competition_id'])})
     else:
         return render(request, "competitor/competition.html", context={"name": name,
-                                                                       'tasks': tasks_table(request.GET['competition_id'])})
+                                                                       'tasks': tasks_table(
+                                                                           request.GET['competition_id'])})
 
 
 def task(request):
@@ -389,10 +463,10 @@ def task(request):
         context = {
             'competition_name': competition_name,
             'task_name': this_task[1],
-            'legend': this_task[3],
-            'input': this_task[4],
-            'output': this_task[5],
-            'specifications': this_task[6],
+            'legend': this_task[3].replace('\n', '<br>'),
+            'input': this_task[4].replace('\n', '<br>'),
+            'output': this_task[5].replace('\n', '<br>'),
+            'specifications': this_task[6].replace('\n', '<br>'),
             'form': forms.FileForm(),
             'solutions': task_solutions_table(this_task[0], request.user.username),
             'competition_id': this_task[2]
@@ -411,10 +485,10 @@ def task(request):
             index = all[-1][0] + 1 if all else 1
             cursor.execute("INSERT INTO Solutions VALUES (?, ?, ?, 'TESTING')",
                            (index, this_task[0], request.user.username))
-            connector.commit()
+            close_db(connector)
             solution_dir = this_directory + str(index) + '/'
-            from os import system
-            system('mkdir ' + solution_dir)
+            from os import mkdir
+            mkdir(solution_dir)
             with open(solution_dir + 'solution.zip', 'wb') as fs:
                 for chunk in file.chunks():
                     fs.write(chunk)
@@ -423,7 +497,7 @@ def task(request):
                 obj.extractall(solution_dir)
             remove(solution_dir + 'solution.zip')
             from contest.TesterGlobal import TesterGlobal
-            TesterGlobal(index, this_task[0], this_task[1], request.user.username, 3000).start()
+            TesterGlobal(index, this_task[0], this_task[1], request.user.username, 10000).start()
         return HttpResponseRedirect('/task?task_id=' + str(this_task[0]))
 
 
@@ -468,11 +542,12 @@ def create_user(request, username, password):
 
 
 def reset(request):
-    connector = connect('db.sqlite3')
-    cursor = connector.cursor()
+    connector, cursor = open_db()
     cursor.execute('DROP TABLE IF EXISTS Solutions;')
     cursor.execute('DROP TABLE IF EXISTS Competitions;')
     cursor.execute('DROP TABLE IF EXISTS Tasks;')
+    cursor.execute('DROP TABLE IF EXISTS Users;')
+    cursor.execute('DROP TABLE IF EXISTS Permissions;')
     cursor.execute(
         '''
         CREATE TABLE Solutions(
@@ -505,8 +580,28 @@ def reset(request):
         );
         '''
     )
-    connector.commit()
-    cursor.close()
+    cursor.execute(
+        '''
+        CREATE TABLE Users(
+            surname TEXT,
+            name TEXT,
+            middle_name TEXT,
+            group_name TEXT,
+            email TEXT,
+            role TEXT
+        );
+        '''
+    )
+    cursor.execute(
+        '''
+        CREATE TABLE Permissions(
+            id INTEGER PRIMARY KEY AUTOINCREMENT,
+            username TEXT,
+            competition_id INTEGER
+        );
+        '''
+    )
+    close_db(connector)
     from os import system
     from os.path import exists
     if exists('../data'):
