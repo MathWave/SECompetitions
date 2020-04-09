@@ -46,19 +46,12 @@ def users_sorting_key(x):
     return ' '.join(x[0:3])
 
 
-def get_select(selected):
-    return '<select id="role" selected="' + selected + '">' \
-                                                       '<option value="user">Пользователь</option>' \
-                                                       '<option value="admin">Админ</option>' \
-                                                       '<option value="superuser">Бог</option></select>'
-
-
 def get_new_user_inputs():
-    values = ['surname', 'name', 'middle_name', 'droup_name', 'email']
+    values = ['surname', 'name', 'middle_name', 'group_name', 'email']
     line = '<tr>'
     for val in values:
         line += '<td><input type="text" name="' + val + '"></td>'
-    line += '<td>' + get_select('user') + '</td><td><input type="submit" value="Создать">'
+    line += '<td></td><td><input type="submit" value="Создать">'
     return line
 
 
@@ -74,19 +67,103 @@ def user_table():
     close_db(connector)
     for user in sorted(users, key=users_sorting_key):
         line += '<tr>'
-        for i in range(0, 5):
-            line += '<td>' + user[i] + '</td>'
-        line += '<td>' + get_select(user[5]) + '</td>'
-        line += '</tr>'
+        for field in user:
+            line += '<td>' + field + '</td>'
+        line += '<td></td></tr>'
     return line
+
+
+def user_select():
+    connector, cursor = open_db()
+    cursor.execute('SELECT * FROM Users')
+    users = [u[4] for u in cursor.fetchall()]
+    close_db(connector)
+    line = '<select name="user" id="user">'
+    for user in users:
+        line += '<option value="' + user + '">' + user + '</option>'
+    line += '</select>'
+    return line
+
+
+def role_select():
+    return '<select name="role" id="role">' \
+           '<option value="user">Пользователь</option>' \
+           '<option value="admin">Админ</option>' \
+           '<option value="superuser">Бог</option>' \
+           '</select>'
+
+
+def role_table():
+    columns_ru = ['Пользователь',  'Роль', '']
+    line = '<tr>'
+    for c in columns_ru:
+        line += '<td><b>' + c + '</b></td>'
+    line += '<tr><td>' + user_select() + '</td><td>' + role_select() + \
+            '</td><td><input type="submit" value="Назначить"></td></tr>'
+    return line
+
+
+
+def send_email(subject, to_addr, from_addr, body_text):
+    import smtplib
+
+    body = "\r\n".join((
+        "From: %s" % from_addr,
+        "To: %s" % to_addr,
+        "Subject: %s" % subject,
+        "",
+        body_text
+    ))
+
+    server = smtplib.SMTP('smtp.gmail.com', 587)
+    server.starttls()
+    server.login('secompetitionssender@gmail.com', 'HSEguestHSEpassw0rd')
+    server.sendmail(from_addr, [to_addr], body)
+    server.quit()
+
+
+def generate_password():
+    from random import choice
+    letters = 'qwertyuiopasdfghjklzxcvbnm1234567890QWERTYUIOPASDFGHJKLZXCVBNM'
+    password = ''
+    for i in range(20):
+        password += choice(letters)
+    return password
 
 
 def superuser(request):
     check_superuser(request)
-    if request.method == 'GET':
-        return render(request, 'superuser/superuser.html', context={'table': user_table()})
-    else:
-        return HttpResponseRedirect('/main')
+    if request.method == 'POST':
+        if 'role' in request.POST.keys():
+            connector, cursor = open_db()
+            cursor.execute('UPDATE Users SET role = ? WHERE email = ?;', (request.POST['role'], request.POST['user']))
+            if request.POST['role'] == 'user':
+                is_staff, is_superuser = 0, 0
+            elif request.POST['role'] == 'admin':
+                is_staff, is_superuser = 1, 0
+            else:
+                is_staff, is_superuser = 1, 1
+            cursor.execute('UPDATE auth_user SET is_staff = ?, is_superuser = ? WHERE username = ?',
+                           (is_staff, is_superuser, request.POST['user']))
+            close_db(connector)
+        else:
+            password = generate_password()
+            text = 'Login: ' + request.POST['email'] + '\r\n'
+            text += 'Password: ' + password
+            send_email('Welcome to SECompetitions!', request.POST['email'], 'secompetitionssender@gmail.com', text)
+            connector, cursor = open_db()
+            cursor.execute('INSERT INTO Users VALUES (?, ?, ?, ?, ?, ?)', (
+                request.POST['surname'],
+                request.POST['name'],
+                request.POST['middle_name'],
+                request.POST['group_name'],
+                request.POST['email'],
+                'Пользователь'
+            ))
+            close_db(connector)
+            user = User.objects.create_user(username=request.POST['email'], password=password)
+            user.save()
+    return render(request, 'superuser/superuser.html', context={'table': user_table(), 'role_table': role_table()})
 
 
 ########################################################################################################################
@@ -501,12 +578,30 @@ def task(request):
         return HttpResponseRedirect('/task?task_id=' + str(this_task[0]))
 
 
+def settings_fabric(request, context):
+    if request.user.is_staff:
+        return render(request, 'admin/settings.html', context=context)
+    else:
+        return render(request, 'competitor/settings.html', context=context)
+
+
 def settings(request):
     check_login(request)
-    if request.user.is_staff:
-        return render(request, 'admin/settings.html', context={'name': request.user.username})
-    else:
-        return render(request, "competitor/settings.html", context={"name": request.user.username})
+    context = {'username': request.user.username}
+    if request.method == 'POST':
+        old = request.POST['old']
+        new = request.POST['new']
+        again = request.POST['again']
+        user = authenticate(username=request.user.username, password=old)
+        if not user:
+            context['error'] = 'Пароль неверный'
+        elif new != again:
+            context['error'] = 'Пароли не совпадают'
+        else:
+            context['error'] = 'Пароль успешно изменен'
+            user.set_password(new)
+            user.save()
+    return settings_fabric(request, context)
 
 
 def restore(request):
@@ -519,7 +614,7 @@ def enter(request):
         return HttpResponseRedirect("/main")
     if request.method == "POST":
         user = authenticate(username=request.POST.get('email'), password=request.POST.get('password'))
-        if user is not None and user.is_active:
+        if user is not None:
             login(request, user)
             request.session["is_auth_ok"] = '1'
             return HttpResponseRedirect('/main')

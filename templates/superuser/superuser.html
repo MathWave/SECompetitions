@@ -31,5 +31,17 @@
                 </form>
             {% endautoescape %}
         </div>
+        <div>
+            <hr>
+            <h1>Назначить роль</h1>
+            <table border="1px solid black">
+                <form method="POST">
+                    {% csrf_token %}
+                    {% autoescape off %}
+                    {{ role_table }}
+                    {% endautoescape %}
+                </form>
+            </table>
+        </div>
 	</body>
 </html>
