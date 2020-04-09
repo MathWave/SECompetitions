@@ -6,7 +6,7 @@ def test(solution_id, task_id, working_dir):
     from os.path import join
     from contest.methods import open_db, close_db
     test_cmd = '(cd ' + working_dir + ' && ' + \
-               'mono ../../../../../SECompetitions/nunit_console/tools/nunit3-console.exe ' + \
+               'mono ../../../../../SECompetitions/nunit_console/nunit3-console.exe ' + \
                str(task_id) + '.dll)'
     p = Popen(test_cmd, shell=True)
     p.wait()

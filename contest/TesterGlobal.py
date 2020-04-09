@@ -73,8 +73,8 @@ class TesterGlobal(Thread):
                     close_db(connector)
                     return
         from contest.Tester import Tester
-        for file in listdir('nunit_files'):
-            shell('cp nunit_files/' + file + ' ' + working_dir)
+        for file in listdir('nunit_console'):
+            shell('cp nunit_console/' + file + ' ' + working_dir)
         thread = Tester(self.solution_id, self.task_id, working_dir)
         thread.start()
         thread.join(self.time_limit_milliseconds / 1000)
@@ -83,6 +83,8 @@ class TesterGlobal(Thread):
         if cursor.fetchone()[3] == 'TESTING':
             cursor.execute("UPDATE Solutions SET result = 'Time limit' WHERE id = ?;", (self.solution_id,))
         close_db(connector)
+        from shutil import rmtree
+        rmtree(working_dir)
 
     def __init__(self, solution_id, task_id, task_name, username, time_limit_milliseconds):
         Thread.__init__(self)
