@@ -24,8 +24,8 @@ urlpatterns = [
     path('admin/remove_tests', views.admin_remove_tests),
 
     path('superuser/main', views.superuser),
+    path('delete_user', views.delete_user),
 
-    path('create_user/<username>/<password>', views.create_user),
     path('reset', views.reset),
     re_path('^', views.redirect)
 ]

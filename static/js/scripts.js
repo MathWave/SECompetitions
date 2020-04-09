@@ -37,3 +37,7 @@ function remove_tests(task_id) {
 function god_mode() {
 	window.location.href = 'http://127.0.0.1:8000/superuser/main'
 }
+function delete_user(username) {
+	let del = confirm("Точно удаляем?");
+	if (del) window.location.href = 'http://127.0.0.1:8000/delete_user?user=' + username
+}

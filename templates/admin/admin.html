@@ -21,15 +21,15 @@
                 {{ competitions }}
             {% endautoescape %}
         </div>
+        {% if is_superuser %}
         <div>
             <input type="submit" class="enter_simple" onclick="new_competition()" value="Создать новое соревнование">
         </div>
         <div>
-            {% if is_superuser %}
-                <center>
-                    <input type="submit" class="enter_simple" onclick="god_mode()" value="Режим Бога">
-                </center>
-            {% endif %}
+            <center>
+                <input type="submit" class="enter_simple" onclick="god_mode()" value="Режим Бога">
+            </center>
         </div>
+        {% endif %}
 	</body>
 </html>

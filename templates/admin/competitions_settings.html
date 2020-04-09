@@ -19,16 +19,32 @@
             {{ tasks }}
         {% endautoescape %}
     </div>
+    {% if is_superuser %}
     <div>
         <input type="submit" class="enter_simple" onclick="new_task({{ competition_id }})" value="Добавить таск">
     </div>
+    {% endif %}
     <div>
         <div style="text-align: center;">
             <input type="submit" class="enter_simple" onclick="solutions({{ competition_id }})" value="Посмотреть посылки">
         </div>
-        <div style="text-align: center;">
-            <input type="submit" class="enter_simple" onclick="delete_solution({{ competition_id }})" value="Удалить соревнование">
-        </div>
+        {% if is_superuser %}
+            <div style="text-align: center;">
+                <input type="submit" class="enter_simple" onclick="delete_solution({{ competition_id }})" value="Удалить соревнование">
+            </div>
+            <hr>
+            <h1>
+                Доступ
+            </h1>
+            <form method="POST">
+            {% csrf_token %}
+            <table border="1px solid black">
+                {% autoescape off %}
+                {{ permissions_table }}
+                {% endautoescape %}
+            </table>
+            </form>
+        {% endif %}
     </div>
 </body>
 </html>

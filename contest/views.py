@@ -13,30 +13,27 @@ from contest.methods import open_db, close_db
 
 
 def check_login(request):
-    if not request.user.is_authenticated:
-        return HttpResponseRedirect('/enter')
+    return request.user.is_authenticated
 
 
 def check_admin(request):
-    check_login(request)
-    if not request.user.is_staff:
-        return HttpResponseRedirect('/enter')
+    return check_login(request) and request.user.is_staff
 
 
 def check_superuser(request):
-    check_admin(request)
-    if not request.user.is_superuser:
-        return HttpResponseRedirect('/enter')
+    return check_admin(request) and request.user.is_superuser
 
 
-def has_permission(username, competition_id):
+def check_permission(username, competition_id):
     connector, cursor = open_db()
-    cursor.execute('SELECT * FROM Permissons WHERE username = ? AND competition_id = ?', (username, competition_id))
+    cursor.execute('SELECT * FROM Permissions WHERE username = ? AND competition_id = ?', (username, competition_id))
     out = cursor.fetchall()
-    cursor.execute('SELECT * FROM user_auth WHERE username = ? AND is_superuser = 1', (username,))
+    cursor.execute('SELECT * FROM auth_user WHERE username = ? AND is_superuser = 1', (username,))
     is_superuser = len(cursor.fetchall()) != 0
     close_db(connector)
-    return len(out) != 0 or is_superuser
+    if len(out) == 0 and not is_superuser:
+        return False
+    return True
 
 
 ########################################################################################################################
@@ -44,6 +41,18 @@ def has_permission(username, competition_id):
 
 def users_sorting_key(x):
     return ' '.join(x[0:3])
+
+
+def delete_user(request):
+    if not check_superuser(request):
+        return HttpResponseRedirect('/main')
+    username = request.GET['user']
+    connector, cursor = open_db()
+    cursor.execute('DELETE FROM Users WHERE email = ?', (username,))
+    cursor.execute('DELETE FROM auth_user WHERE username = ?', (username,))
+    cursor.execute('DELETE FROM Solutions WHERE username = ?', (username,))
+    close_db(connector)
+    return HttpResponseRedirect('/superuser/main')
 
 
 def get_new_user_inputs():
@@ -69,7 +78,7 @@ def user_table():
         line += '<tr>'
         for field in user:
             line += '<td>' + field + '</td>'
-        line += '<td></td></tr>'
+        line += '<td><input type="button" onclick=delete_user("' + user[4] + '") value=Удалить></td></tr>'
     return line
 
 
@@ -79,7 +88,7 @@ def user_select():
     users = [u[4] for u in cursor.fetchall()]
     close_db(connector)
     line = '<select name="user" id="user">'
-    for user in users:
+    for user in sorted(users):
         line += '<option value="' + user + '">' + user + '</option>'
     line += '</select>'
     return line
@@ -132,7 +141,8 @@ def generate_password():
 
 
 def superuser(request):
-    check_superuser(request)
+    if not check_superuser(request):
+        return HttpResponseRedirect('/main')
     if request.method == 'POST':
         if 'role' in request.POST.keys():
             connector, cursor = open_db()
@@ -170,9 +180,13 @@ def superuser(request):
 
 
 # получить список соревнований
-def admin_competitions_table():
+def admin_competitions_table(request):
     connector, cursor = open_db()
-    cursor.execute("SELECT * FROM Competitions")
+    if request.user.is_superuser:
+        cursor.execute("SELECT * FROM Competitions")
+    else:
+        cursor.execute("SELECT * FROM Competitions INNER JOIN Permissions ON "
+                       "Competitions.id = Permissions.competition_id WHERE username = ?;", (request.user.username,))
     comps = cursor.fetchall()
     line = '<table>\n'
     for c in comps:
@@ -213,11 +227,24 @@ def solutions_table(competition_id):
     return table
 
 
+def permissions_table(competition_id):
+    line = '<tr><td><input type="text" name="input"></td><td><input type="submit" value="Добавить"></td></tr>'
+    connector, cursor = open_db()
+    cursor.execute('SELECT * FROM Permissions INNER JOIN Users ON '
+                   'Permissions.username = Users.email;')
+    perms = cursor.fetchall()
+    close_db(connector)
+    for perm in perms:
+        line += '<tr><td>' + ' '.join(perm[3:6]) + '</td><td>' + perm[6] + '</td></tr>'
+    return line
+
+
 ########################################################################################################################
 
 
 def admin_delete_task(request):
-    check_admin(request)
+    if not check_superuser(request):
+        return HttpResponseRedirect('/main')
     task_id = request.GET['task_id']
     connector = connect('db.sqlite3')
     cursor = connector.cursor()
@@ -237,7 +264,8 @@ def admin_delete_task(request):
 
 
 def admin_delete_competition(request):
-    check_admin(request)
+    if not check_superuser(request):
+        return HttpResponseRedirect('/main')
     competition_id = request.GET['competition_id']
     connector, cursor = open_db()
     cursor.execute('SELECT * FROM Tasks WHERE competition_id = ?', (competition_id,))
@@ -258,9 +286,14 @@ def admin_delete_competition(request):
 
 
 def admin_remove_tests(request):
-    check_admin(request)
+    if not check_admin(request):
+        return HttpResponseRedirect('/main')
     task_id = request.GET['task_id']
     connector, cursor = open_db()
+    cursor.execute('SELECT * FROM Tasks WHERE id = ?', (task_id,))
+    competition_id = cursor.fetchone()[2]
+    if not check_permission(request.user.username, competition_id):
+        return HttpResponseRedirect('/main')
     cursor.execute('UPDATE Tasks SET tests_uploaded = 0 WHERE id = ?', (task_id,))
     close_db(connector)
     from os import remove
@@ -269,7 +302,8 @@ def admin_remove_tests(request):
 
 
 def admin_show_file(request):
-    check_admin(request)
+    if not check_admin(request):
+        return HttpResponseRedirect('/main')
     solution_id = request.GET['solution_id']
     connector, cursor = open_db()
     cursor.execute('SELECT * FROM Solutions WHERE id = ?', (solution_id,))
@@ -277,8 +311,10 @@ def admin_show_file(request):
     cursor.execute('SELECT * FROM Tasks WHERE id = ?', (info[1],))
     task_info = cursor.fetchone()
     cursor.execute('SELECT * FROM Competitions WHERE id = ?', (task_info[2],))
-    competition = cursor.fetchone()[1]
+    competition = cursor.fetchone()
     close_db(connector)
+    if not check_permission(request.user.username, competition[0]):
+        return HttpResponseRedirect('/main')
     rootdir = '../data/solutions/' + str(solution_id) + '/' + request.GET.get('file', '')
     from os.path import dirname
     folder = '/'.join(dirname(rootdir).split('/')[4:])
@@ -286,7 +322,7 @@ def admin_show_file(request):
         file = open(rootdir, 'r').read()
     except:
         return HttpResponseRedirect('/admin/solution?solution_id=' + str(solution_id) + '&folder=' + folder)
-    return render(request, 'admin/show_file.html', context={'competition': competition,
+    return render(request, 'admin/show_file.html', context={'competition': competition[1],
                                                             'task': task_info[1],
                                                             'username': info[2],
                                                             'id': solution_id,
@@ -299,7 +335,8 @@ def admin_show_file(request):
 
 
 def admin_solution(request):
-    check_admin(request)
+    if not check_admin(request):
+        return HttpResponseRedirect('/main')
     solution_id = request.GET['solution_id']
     folder = request.GET.get('folder', '')
     if '..' in folder:
@@ -331,9 +368,11 @@ def admin_solution(request):
     cursor.execute('SELECT * FROM Tasks WHERE id = ?', (info[1],))
     task_info = cursor.fetchone()
     cursor.execute('SELECT * FROM Competitions WHERE id = ?', (task_info[2],))
-    competition = cursor.fetchone()[1]
+    competition = cursor.fetchone()
     close_db(connector)
-    return render(request, 'admin/solution.html', context={'competition': competition,
+    if not check_permission(request.user.username, competition[0]):
+        return HttpResponseRedirect('/main')
+    return render(request, 'admin/solution.html', context={'competition': competition[1],
                                                            'task': task_info[1],
                                                            'username': info[2],
                                                            'id': info[0],
@@ -345,9 +384,10 @@ def admin_solution(request):
 
 
 def admin_solutions(request):
-    check_admin(request)
+    if not check_admin(request) or not check_permission(request.user.username, request.GET['competition_id']):
+        return HttpResponseRedirect('/main')
     connector, cursor = open_db()
-    cursor.execute('SELECT * FROM Competitions WHERE id = ?', (request.GET['competition_id']))
+    cursor.execute('SELECT * FROM Competitions WHERE id = ?', (request.GET['competition_id'],))
     name = cursor.fetchone()[1]
     close_db(connector)
     return render(request, "admin/solutions.html",
@@ -357,7 +397,8 @@ def admin_solutions(request):
 
 
 def admin_new_competition(request):
-    check_admin(request)
+    if not check_superuser(request):
+        return HttpResponseRedirect('/main')
     if request.method == 'GET':
         return render(request, "admin/new_competition.html", context={"form": forms.NewCompetitionForm()})
     else:
@@ -373,24 +414,50 @@ def admin_new_competition(request):
 
 
 def admin_competition(request):
-    check_admin(request)
+    if not check_admin(request):
+        return HttpResponseRedirect('/main')
     competition_id = request.GET['competition_id']
+    if not check_permission(request.user.username, competition_id):
+        return HttpResponseRedirect('/main')
+    if request.method == 'POST':
+        line = request.POST['input']
+        connector, cursor = open_db()
+        if '@' in line:
+            cursor.execute('SELECT * FROM Users WHERE email = ?', (line,))
+        elif any(c.isdigit() for c in line):
+            cursor.execute('SELECT * FROM Users WHERE group_name = ?', (line,))
+        else:
+            try:
+                s, n, m = line.split(' ')
+            except:
+                s, n, m = '', '', ''
+            cursor.execute('SELECT * FROM Users WHERE surname = ? AND name = ? AND middle_name = ?', (s, n, m))
+        newusers = cursor.fetchall()
+        for user in newusers:
+            cursor.execute('INSERT INTO Permissions (username, competition_id) VALUES (?, ?)',
+                           (user[4], competition_id))
+        close_db(connector)
     connector, cursor = open_db()
     cursor.execute('SELECT competition_name FROM Competitions WHERE id = ?', (competition_id,))
     name = cursor.fetchone()[0]
     return render(request, "admin/competitions_settings.html",
                   context={"name": name,
                            'tasks': admin_tasks_table(request.GET['competition_id']),
-                           'competition_id': request.GET['competition_id']})
+                           'competition_id': request.GET['competition_id'],
+                           'is_superuser': request.user.is_superuser,
+                           'permissions_table': permissions_table(request.GET['competition_id'])})
 
 
 def admin_task(request):
-    check_admin(request)
+    if not check_admin(request):
+        return HttpResponseRedirect('/main')
     connector, cursor = open_db()
     cursor.execute('SELECT * FROM Tasks WHERE id = ?', (request.GET['task_id'],))
     this_task = cursor.fetchone()
     cursor.execute('SELECT competition_name from Competitions WHERE id = ?', (this_task[2],))
     competition_name = cursor.fetchone()[0]
+    if not check_permission(request.user.username, this_task[2]):
+        return HttpResponseRedirect('/main')
     context = {'competition': competition_name, 'task': this_task[1], 'legend': this_task[3], 'input': this_task[4],
                'output': this_task[5], 'specifications': this_task[6], 'tests_uploaded': bool(this_task[7]),
                'tests': forms.TestsForm(), 'competition_id': this_task[2], 'task_id': request.GET['task_id']}
@@ -424,7 +491,8 @@ def admin_task(request):
 
 
 def admin_new_task(request):
-    check_admin(request)
+    if not check_superuser(request):
+        return HttpResponseRedirect('/main')
     connector, cursor = open_db()
     cursor.execute('SELECT competition_name FROM Competitions WHERE id = ?', (request.GET['competition_id'],))
     competition_name = cursor.fetchone()[0]
@@ -450,8 +518,9 @@ def admin_new_task(request):
 
 
 def admin_main(request):
-    check_admin(request)
-    return render(request, "admin/admin.html", context={"competitions": admin_competitions_table(),
+    if not check_admin(request):
+        return HttpResponseRedirect('/main')
+    return render(request, "admin/admin.html", context={"competitions": admin_competitions_table(request),
                                                         'is_superuser': request.user.is_superuser})
 
 
@@ -459,9 +528,13 @@ def admin_main(request):
 
 
 # получить список всех соревнований (потом надо будет сделать фильтр)
-def competitions_table():
+def competitions_table(request):
     connector, cursor = open_db()
-    cursor.execute("SELECT * FROM Competitions")
+    if request.user.is_superuser:
+        cursor.execute("SELECT * FROM Competitions")
+    else:
+        cursor.execute("SELECT * FROM Competitions INNER JOIN Permissions ON "
+                       "Competitions.id = Permissions.competition_id WHERE username = ?;", (request.user.username,))
     comps = cursor.fetchall()
     line = '<table>\n'
     for c in comps:
@@ -503,11 +576,12 @@ def task_solutions_table(task_id, username):
 
 
 def main(request):
-    check_login(request)
+    if not check_login(request):
+        return HttpResponseRedirect('/enter')
     if request.user.is_staff:
-        return render(request, "admin/main.html", context={"competitions": competitions_table()})
+        return render(request, "admin/main.html", context={"competitions": competitions_table(request)})
     else:
-        return render(request, "competitor/main.html", context={"competitions": competitions_table()})
+        return render(request, "competitor/main.html", context={"competitions": competitions_table(request)})
 
 
 def redirect(request):
@@ -515,7 +589,8 @@ def redirect(request):
 
 
 def competition(request):
-    check_login(request)
+    if not check_login(request) or not check_permission(request.user.username, request.GET['competition_id']):
+        return HttpResponseRedirect('/enter')
     connector, cursor = open_db()
     cursor.execute('SELECT competition_name FROM Competitions WHERE id = ?', (request.GET['competition_id'],))
     name = cursor.fetchone()[0]
@@ -529,13 +604,15 @@ def competition(request):
 
 
 def task(request):
-    check_login(request)
+    if not check_login(request):
+        return HttpResponseRedirect('/enter')
     connector, cursor = open_db()
     cursor.execute('SELECT * FROM Tasks WHERE id = ?', (request.GET['task_id'],))
     this_task = cursor.fetchone()
     cursor.execute('SELECT competition_name FROM Competitions WHERE id = ?', (this_task[2],))
     competition_name = cursor.fetchone()[0]
     close_db(connector)
+    check_permission(request.user.username, this_task[2])
     if request.method == 'GET':
         context = {
             'competition_name': competition_name,
@@ -586,7 +663,8 @@ def settings_fabric(request, context):
 
 
 def settings(request):
-    check_login(request)
+    if not check_login(request):
+        return HttpResponseRedirect('/enter')
     context = {'username': request.user.username}
     if request.method == 'POST':
         old = request.POST['old']
@@ -605,7 +683,8 @@ def settings(request):
 
 
 def restore(request):
-    check_login(request)
+    if not check_login(request):
+        return HttpResponseRedirect('/enter')
     return HttpResponseRedirect("/main")
 
 
@@ -629,11 +708,6 @@ def exit(request):
     logout(request)
     request.session["is_auth_ok"] = '0'
     return HttpResponseRedirect('/enter')
-
-
-def create_user(request, username, password):
-    User.objects.create_user(username=username, password=password)
-    return HttpResponse("OK")
 
 
 def reset(request):

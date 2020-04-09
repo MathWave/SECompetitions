@@ -3,12 +3,12 @@
   <component name="ChangeListManager">
     <list default="true" id="df440fb9-1a96-4034-ae0e-83ac9dcfeb0a" name="Default Changelist" comment="">
       <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/SECompetitions/urls.py" beforeDir="false" afterPath="$PROJECT_DIR$/SECompetitions/urls.py" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/contest/views.py" beforeDir="false" afterPath="$PROJECT_DIR$/contest/views.py" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/db.sqlite3" beforeDir="false" afterPath="$PROJECT_DIR$/db.sqlite3" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/static/css/styles.css" beforeDir="false" afterPath="$PROJECT_DIR$/static/css/styles.css" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/templates/admin/settings.html" beforeDir="false" afterPath="$PROJECT_DIR$/templates/admin/settings.html" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/templates/competitor/settings.html" beforeDir="false" afterPath="$PROJECT_DIR$/templates/competitor/settings.html" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/templates/superuser/superuser.html" beforeDir="false" afterPath="$PROJECT_DIR$/templates/superuser/superuser.html" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/static/js/scripts.js" beforeDir="false" afterPath="$PROJECT_DIR$/static/js/scripts.js" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/templates/admin/admin.html" beforeDir="false" afterPath="$PROJECT_DIR$/templates/admin/admin.html" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/templates/admin/competitions_settings.html" beforeDir="false" afterPath="$PROJECT_DIR$/templates/admin/competitions_settings.html" afterDir="false" />
     </list>
     <option name="SHOW_DIALOG" value="false" />
     <option name="HIGHLIGHT_CONFLICTS" value="true" />
@@ -177,7 +177,7 @@
       <workItem from="1586358340523" duration="4371000" />
       <workItem from="1586364998671" duration="2338000" />
       <workItem from="1586371883017" duration="2753000" />
-      <workItem from="1586376313313" duration="9320000" />
+      <workItem from="1586376313313" duration="22665000" />
     </task>
     <task id="LOCAL-00001" summary="Отправка условий контеста происходит через формы">
       <created>1582733624850</created>
@@ -242,7 +242,14 @@
       <option name="project" value="LOCAL" />
       <updated>1586376905256</updated>
     </task>
-    <option name="localTasksCounter" value="10" />
+    <task id="LOCAL-00010" summary="Теперь можно добавлять пользователей и назначать им права">
+      <created>1586406542591</created>
+      <option name="number" value="00010" />
+      <option name="presentableId" value="LOCAL-00010" />
+      <option name="project" value="LOCAL" />
+      <updated>1586406542591</updated>
+    </task>
+    <option name="localTasksCounter" value="11" />
     <servers />
   </component>
   <component name="TypeScriptGeneratedFilesManager">
@@ -271,7 +278,8 @@
     <MESSAGE value="Начало переезда на бд" />
     <MESSAGE value="Переехали на бд, вроде все работает" />
     <MESSAGE value="Починил штуку в тестирование в несколько потоков" />
-    <option name="LAST_COMMIT_MESSAGE" value="Починил штуку в тестирование в несколько потоков" />
+    <MESSAGE value="Теперь можно добавлять пользователей и назначать им права" />
+    <option name="LAST_COMMIT_MESSAGE" value="Теперь можно добавлять пользователей и назначать им права" />
   </component>
   <component name="WindowStateProjectService">
     <state x="304" y="187" width="1071" height="734" key="#com.intellij.execution.impl.EditConfigurationsDialog" timestamp="1586363060699">
@@ -284,92 +292,67 @@
       <screen x="0" y="0" width="1680" height="1050" />
     </state>
     <state x="528" y="260" key="#com.intellij.openapi.updateSettings.impl.PluginUpdateInfoDialog/0.0.1680.1050@0.0.1680.1050" timestamp="1586123018060" />
-    <state x="421" y="40" key="CommitChangelistDialog2" timestamp="1586376905075">
+    <state x="421" y="40" key="CommitChangelistDialog2" timestamp="1586406542446">
       <screen x="0" y="0" width="1680" height="1050" />
     </state>
     <state x="421" y="40" key="CommitChangelistDialog2/1680.-157.1920.1057/0.0.1680.1050@0.0.1680.1050" timestamp="1586376905075" />
-    <state width="1638" height="262" key="GridCell.Tab.0.bottom" timestamp="1586406368424">
+    <state x="421" y="40" key="CommitChangelistDialog2/1680.-180.1920.1080/0.0.1680.1050@0.0.1680.1050" timestamp="1586406542446" />
+    <state width="1638" height="262" key="GridCell.Tab.0.bottom" timestamp="1586432459982">
       <screen x="0" y="0" width="1680" height="1050" />
     </state>
     <state width="1638" height="262" key="GridCell.Tab.0.bottom/1680.-157.1920.1057/0.0.1680.1050@0.0.1680.1050" timestamp="1586370119322" />
-    <state width="1638" height="262" key="GridCell.Tab.0.bottom/1680.-180.1920.1080/0.0.1680.1050@0.0.1680.1050" timestamp="1586406368424" />
-    <state width="1638" height="262" key="GridCell.Tab.0.center" timestamp="1586406368423">
+    <state width="1638" height="262" key="GridCell.Tab.0.bottom/1680.-180.1920.1080/0.0.1680.1050@0.0.1680.1050" timestamp="1586432459982" />
+    <state width="1638" height="262" key="GridCell.Tab.0.center" timestamp="1586432459980">
       <screen x="0" y="0" width="1680" height="1050" />
     </state>
     <state width="1638" height="262" key="GridCell.Tab.0.center/1680.-157.1920.1057/0.0.1680.1050@0.0.1680.1050" timestamp="1586370119321" />
-    <state width="1638" height="262" key="GridCell.Tab.0.center/1680.-180.1920.1080/0.0.1680.1050@0.0.1680.1050" timestamp="1586406368423" />
-    <state width="1638" height="262" key="GridCell.Tab.0.left" timestamp="1586406368422">
+    <state width="1638" height="262" key="GridCell.Tab.0.center/1680.-180.1920.1080/0.0.1680.1050@0.0.1680.1050" timestamp="1586432459980" />
+    <state width="1638" height="262" key="GridCell.Tab.0.left" timestamp="1586432459979">
       <screen x="0" y="0" width="1680" height="1050" />
     </state>
     <state width="1638" height="262" key="GridCell.Tab.0.left/1680.-157.1920.1057/0.0.1680.1050@0.0.1680.1050" timestamp="1586370119321" />
-    <state width="1638" height="262" key="GridCell.Tab.0.left/1680.-180.1920.1080/0.0.1680.1050@0.0.1680.1050" timestamp="1586406368422" />
-    <state width="1638" height="262" key="GridCell.Tab.0.right" timestamp="1586406368423">
+    <state width="1638" height="262" key="GridCell.Tab.0.left/1680.-180.1920.1080/0.0.1680.1050@0.0.1680.1050" timestamp="1586432459979" />
+    <state width="1638" height="262" key="GridCell.Tab.0.right" timestamp="1586432459981">
       <screen x="0" y="0" width="1680" height="1050" />
     </state>
     <state width="1638" height="262" key="GridCell.Tab.0.right/1680.-157.1920.1057/0.0.1680.1050@0.0.1680.1050" timestamp="1586370119321" />
-    <state width="1638" height="262" key="GridCell.Tab.0.right/1680.-180.1920.1080/0.0.1680.1050@0.0.1680.1050" timestamp="1586406368423" />
-    <state width="1638" height="262" key="GridCell.Tab.1.bottom" timestamp="1586406368427">
+    <state width="1638" height="262" key="GridCell.Tab.0.right/1680.-180.1920.1080/0.0.1680.1050@0.0.1680.1050" timestamp="1586432459981" />
+    <state width="1638" height="262" key="GridCell.Tab.1.bottom" timestamp="1586432459985">
       <screen x="0" y="0" width="1680" height="1050" />
     </state>
     <state width="1638" height="262" key="GridCell.Tab.1.bottom/1680.-157.1920.1057/0.0.1680.1050@0.0.1680.1050" timestamp="1586370119325" />
     <state width="1638" height="262" key="GridCell.Tab.1.bottom/1680.-157.1920.1057/0.0.1680.968@0.0.1680.968" timestamp="1586406295562" />
     <state width="1638" height="235" key="GridCell.Tab.1.bottom/1680.-157.1920.1057/0.23.1680.945@0.23.1680.945" timestamp="1586355813965" />
-    <state width="1638" height="262" key="GridCell.Tab.1.bottom/1680.-180.1920.1080/0.0.1680.1050@0.0.1680.1050" timestamp="1586406368427" />
-    <state width="1638" height="262" key="GridCell.Tab.1.center" timestamp="1586406368426">
+    <state width="1638" height="262" key="GridCell.Tab.1.bottom/1680.-180.1920.1080/0.0.1680.1050@0.0.1680.1050" timestamp="1586432459985" />
+    <state width="1638" height="262" key="GridCell.Tab.1.center" timestamp="1586432459983">
       <screen x="0" y="0" width="1680" height="1050" />
     </state>
     <state width="1638" height="262" key="GridCell.Tab.1.center/1680.-157.1920.1057/0.0.1680.1050@0.0.1680.1050" timestamp="1586370119324" />
     <state width="1638" height="262" key="GridCell.Tab.1.center/1680.-157.1920.1057/0.0.1680.968@0.0.1680.968" timestamp="1586406295561" />
     <state width="1638" height="235" key="GridCell.Tab.1.center/1680.-157.1920.1057/0.23.1680.945@0.23.1680.945" timestamp="1586355813964" />
-    <state width="1638" height="262" key="GridCell.Tab.1.center/1680.-180.1920.1080/0.0.1680.1050@0.0.1680.1050" timestamp="1586406368426" />
-    <state width="1638" height="262" key="GridCell.Tab.1.left" timestamp="1586406368425">
+    <state width="1638" height="262" key="GridCell.Tab.1.center/1680.-180.1920.1080/0.0.1680.1050@0.0.1680.1050" timestamp="1586432459983" />
+    <state width="1638" height="262" key="GridCell.Tab.1.left" timestamp="1586432459983">
       <screen x="0" y="0" width="1680" height="1050" />
     </state>
     <state width="1638" height="262" key="GridCell.Tab.1.left/1680.-157.1920.1057/0.0.1680.1050@0.0.1680.1050" timestamp="1586370119323" />
     <state width="1638" height="262" key="GridCell.Tab.1.left/1680.-157.1920.1057/0.0.1680.968@0.0.1680.968" timestamp="1586406295560" />
     <state width="1638" height="235" key="GridCell.Tab.1.left/1680.-157.1920.1057/0.23.1680.945@0.23.1680.945" timestamp="1586355813963" />
-    <state width="1638" height="262" key="GridCell.Tab.1.left/1680.-180.1920.1080/0.0.1680.1050@0.0.1680.1050" timestamp="1586406368425" />
-    <state width="1638" height="262" key="GridCell.Tab.1.right" timestamp="1586406368427">
+    <state width="1638" height="262" key="GridCell.Tab.1.left/1680.-180.1920.1080/0.0.1680.1050@0.0.1680.1050" timestamp="1586432459983" />
+    <state width="1638" height="262" key="GridCell.Tab.1.right" timestamp="1586432459984">
       <screen x="0" y="0" width="1680" height="1050" />
     </state>
     <state width="1638" height="262" key="GridCell.Tab.1.right/1680.-157.1920.1057/0.0.1680.1050@0.0.1680.1050" timestamp="1586370119324" />
     <state width="1638" height="262" key="GridCell.Tab.1.right/1680.-157.1920.1057/0.0.1680.968@0.0.1680.968" timestamp="1586406295562" />
     <state width="1638" height="235" key="GridCell.Tab.1.right/1680.-157.1920.1057/0.23.1680.945@0.23.1680.945" timestamp="1586355813964" />
-    <state width="1638" height="262" key="GridCell.Tab.1.right/1680.-180.1920.1080/0.0.1680.1050@0.0.1680.1050" timestamp="1586406368427" />
-    <state x="440" y="261" key="Vcs.Push.Dialog.v2" timestamp="1586376906531">
+    <state width="1638" height="262" key="GridCell.Tab.1.right/1680.-180.1920.1080/0.0.1680.1050@0.0.1680.1050" timestamp="1586432459984" />
+    <state x="440" y="261" key="Vcs.Push.Dialog.v2" timestamp="1586406543597">
       <screen x="0" y="0" width="1680" height="1050" />
     </state>
     <state x="440" y="261" key="Vcs.Push.Dialog.v2/1680.-157.1920.1057/0.0.1680.1050@0.0.1680.1050" timestamp="1586376906531" />
+    <state x="440" y="261" key="Vcs.Push.Dialog.v2/1680.-180.1920.1080/0.0.1680.1050@0.0.1680.1050" timestamp="1586406543597" />
   </component>
   <component name="XDebuggerManager">
     <breakpoint-manager>
-      <breakpoints>
-        <line-breakpoint enabled="true" suspend="THREAD" type="python-line">
-          <url>file://$PROJECT_DIR$/contest/views.py</url>
-          <line>413</line>
-          <option name="timeStamp" value="1" />
-        </line-breakpoint>
-        <line-breakpoint enabled="true" suspend="THREAD" type="python-line">
-          <url>file://$PROJECT_DIR$/contest/views.py</url>
-          <line>397</line>
-          <option name="timeStamp" value="2" />
-        </line-breakpoint>
-        <line-breakpoint enabled="true" suspend="THREAD" type="python-line">
-          <url>file://$PROJECT_DIR$/contest/TesterGlobal.py</url>
-          <line>56</line>
-          <option name="timeStamp" value="22" />
-        </line-breakpoint>
-        <line-breakpoint enabled="true" suspend="THREAD" type="python-line">
-          <url>file://$PROJECT_DIR$/contest/views.py</url>
-          <line>149</line>
-          <option name="timeStamp" value="28" />
-        </line-breakpoint>
-        <line-breakpoint enabled="true" suspend="THREAD" type="python-line">
-          <url>file://$PROJECT_DIR$/contest/views.py</url>
-          <line>138</line>
-          <option name="timeStamp" value="29" />
-        </line-breakpoint>
-      </breakpoints>
       <default-breakpoints>
         <breakpoint type="python-exception">
           <properties notifyOnTerminate="true" exception="BaseException">
