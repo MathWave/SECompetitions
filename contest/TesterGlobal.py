@@ -1,4 +1,5 @@
 from threading import Thread
+from shutil import rmtree
 
 
 def test_folder_name(path):
@@ -33,7 +34,6 @@ def is_project(path):
 
 def build_and_copy(path, working_dir):
     from os.path import exists, join
-    from shutil import rmtree
     from contest.methods import shell
     name = path.split('/')[-1]
     rm_dir = path + '/bin/Debug'
@@ -83,7 +83,6 @@ class TesterGlobal(Thread):
         if cursor.fetchone()[3] == 'TESTING':
             cursor.execute("UPDATE Solutions SET result = 'Time limit' WHERE id = ?;", (self.solution_id,))
         close_db(connector)
-        from shutil import rmtree
         rmtree(working_dir)
 
     def __init__(self, solution_id, task_id, task_name, username, time_limit_milliseconds):

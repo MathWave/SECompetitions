@@ -160,7 +160,9 @@ def superuser(request):
             password = generate_password()
             text = 'Login: ' + request.POST['email'] + '\r\n'
             text += 'Password: ' + password
-            send_email('Welcome to SECompetitions!', request.POST['email'], 'secompetitionssender@gmail.com', text)
+            from threading import Thread
+            Thread(target=(lambda: send_email('Welcome to SECompetitions!', request.POST['email'],
+                                              'secompetitionssender@gmail.com', text))).start()
             connector, cursor = open_db()
             cursor.execute('INSERT INTO Users VALUES (?, ?, ?, ?, ?, ?)', (
                 request.POST['surname'],
@@ -211,9 +213,8 @@ def admin_tasks_table(competition_id):
 
 def solutions_table(competition_id):
     connector, cursor = open_db()
-    cursor.execute('SELECT * FROM Solutions '
-                   'INNER JOIN Tasks ON Solutions.Task_id = Tasks.id '
-                   'WHERE competition_id = ?', (competition_id,))
+    cursor.execute('SELECT * FROM Solutions AS A INNER JOIN Tasks AS B ON A.Task_id = B.id '
+                   'INNER JOIN Users AS C ON A.username = C.email WHERE competition_id = ?', (competition_id,))
     solution_list = cursor.fetchall()
     close_db(connector)
     table = '<tr><td><b>Id</b></td><td><b>Таск</b></td><td><b>Пользователь</b></td><td><b>Вердикт</b></td></tr>'
@@ -221,8 +222,9 @@ def solutions_table(competition_id):
         table += '<tr>\n'
         table += "<td><a href='http://127.0.0.1:8000/admin/solution?solution_id=" + str(solution[0]) + "'>" + \
                  str(solution[0]) + '</a></td>'
-        for i in 5, 2, 3:
-            table += '<td>' + str(solution[i]) + '</td>\n'
+        table += '<td>' + str(solution[5]) + '</td>\n'
+        table += '<td>' + ' '.join(solution[12:15]) + '</td>'
+        table += '<td>' + str(solution[3]) + '</td>'
         table += '</tr>\n'
     return table
 
@@ -460,7 +462,8 @@ def admin_task(request):
         return HttpResponseRedirect('/main')
     context = {'competition': competition_name, 'task': this_task[1], 'legend': this_task[3], 'input': this_task[4],
                'output': this_task[5], 'specifications': this_task[6], 'tests_uploaded': bool(this_task[7]),
-               'tests': forms.TestsForm(), 'competition_id': this_task[2], 'task_id': request.GET['task_id']}
+               'tests': forms.TestsForm(), 'competition_id': this_task[2], 'task_id': request.GET['task_id'],
+               'is_superuser': request.user.is_superuser}
     if request.method == 'POST':
         have_tests = int('tests' in request.FILES.keys())
         cursor.execute("UPDATE Tasks SET "

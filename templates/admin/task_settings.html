@@ -62,10 +62,18 @@
                 </tr>
             </table>
             <hr>
+        <div>
             <input type="submit" value="Сохранить" class=enter_simple>
+        </div>
         </form>
+    <div>
+        <input type="button" value="Очистить тесты" class=enter_simple onclick="remove_tests({{ task_id }})">
+    </div>
+    {% if is_superuser %}
+        <div>
             <input type="button" value="Удалить таск" class=enter_simple onclick="delete_task({{ task_id }})">
-            <input type="button" value="Очистить тесты" class=enter_simple onclick="remove_tests({{ task_id }})">
+        </div>
+    {% endif %}
     </div>
 </body>
 </html>
