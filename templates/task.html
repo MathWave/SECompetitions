@@ -17,7 +17,12 @@
 </head>
 <body>
     <div>
-        <button class="button_header_admin" onclick="main()">Главная</button><button class="button_header_admin" onclick="admin()">Админка</button><button class="button_header_admin" onclick="settings()">Настройки</button><button class="button_header_admin" onclick="logout()">Выход</button>
+        {% if is_admin %}
+            <button class="button_header_admin" onclick="main()">Главная</button><button class="button_header_admin" onclick="admin()">Админка</button><button class="button_header_admin" onclick="settings()">Настройки</button><button class="button_header_admin" onclick="logout()">Выход</button>
+        {% else %}
+                <button class="button_header" onclick="main()">Главная</button><button class="button_header" onclick="settings()">Настройки</button><button class="button_header" onclick="logout()">Выход</button>
+        {% endif %}
+        <hr>
     </div>
     <div style="text-align: center;">
         <h1>

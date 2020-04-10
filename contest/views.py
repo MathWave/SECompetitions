@@ -175,7 +175,7 @@ def superuser(request):
             close_db(connector)
             user = User.objects.create_user(username=request.POST['email'], password=password)
             user.save()
-    return render(request, 'superuser/superuser.html', context={'table': user_table(), 'role_table': role_table()})
+    return render(request, 'superuser.html', context={'table': user_table(), 'role_table': role_table()})
 
 
 ########################################################################################################################
@@ -324,16 +324,15 @@ def admin_show_file(request):
         file = open(rootdir, 'r').read()
     except:
         return HttpResponseRedirect('/admin/solution?solution_id=' + str(solution_id) + '&folder=' + folder)
-    return render(request, 'admin/show_file.html', context={'competition': competition[1],
-                                                            'task': task_info[1],
-                                                            'username': info[2],
-                                                            'id': solution_id,
-                                                            'filename': rootdir.split('/')[-1],
-                                                            'verdict': info[3],
-                                                            'text': file,
-                                                            'file': folder + '/' + rootdir.split('/')[-1],
-                                                            'folder': folder
-                                                            })
+    return render(request, 'show_file.html', context={'competition': competition[1],
+                                                      'task': task_info[1],
+                                                      'username': info[2],
+                                                      'id': solution_id,
+                                                      'filename': rootdir.split('/')[-1],
+                                                      'verdict': info[3],
+                                                      'text': file,
+                                                      'file': folder + '/' + rootdir.split('/')[-1],
+                                                      'folder': folder})
 
 
 def admin_solution(request):
@@ -374,15 +373,14 @@ def admin_solution(request):
     close_db(connector)
     if not check_permission(request.user.username, competition[0]):
         return HttpResponseRedirect('/main')
-    return render(request, 'admin/solution.html', context={'competition': competition[1],
-                                                           'task': task_info[1],
-                                                           'username': info[2],
-                                                           'id': info[0],
-                                                           'verdict': info[3],
-                                                           'files': files,
-                                                           'folder': 'root/' + folder,
-                                                           'competition_id': task_info[2]
-                                                           })
+    return render(request, 'solution.html', context={'competition': competition[1],
+                                                     'task': task_info[1],
+                                                     'username': info[2],
+                                                     'id': info[0],
+                                                     'verdict': info[3],
+                                                     'files': files,
+                                                     'folder': 'root/' + folder,
+                                                     'competition_id': task_info[2]})
 
 
 def admin_solutions(request):
@@ -392,7 +390,7 @@ def admin_solutions(request):
     cursor.execute('SELECT * FROM Competitions WHERE id = ?', (request.GET['competition_id'],))
     name = cursor.fetchone()[1]
     close_db(connector)
-    return render(request, "admin/solutions.html",
+    return render(request, "solutions.html",
                   context={'competition_id': request.GET['competition_id'],
                            'solutions': solutions_table(request.GET['competition_id']),
                            'name': name})
@@ -402,7 +400,7 @@ def admin_new_competition(request):
     if not check_superuser(request):
         return HttpResponseRedirect('/main')
     if request.method == 'GET':
-        return render(request, "admin/new_competition.html", context={"form": forms.NewCompetitionForm()})
+        return render(request, "new_competition.html", context={"form": forms.NewCompetitionForm()})
     else:
         name = request.POST['name']
         connector, cursor = open_db()
@@ -442,7 +440,7 @@ def admin_competition(request):
     connector, cursor = open_db()
     cursor.execute('SELECT competition_name FROM Competitions WHERE id = ?', (competition_id,))
     name = cursor.fetchone()[0]
-    return render(request, "admin/competitions_settings.html",
+    return render(request, "competitions_settings.html",
                   context={"name": name,
                            'tasks': admin_tasks_table(request.GET['competition_id']),
                            'competition_id': request.GET['competition_id'],
@@ -490,7 +488,7 @@ def admin_task(request):
                 for chunk in file.chunks():
                     fs.write(chunk)
         close_db(connector)
-    return render(request, 'admin/task_settings.html', context=context)
+    return render(request, 'task_settings.html', context=context)
 
 
 def admin_new_task(request):
@@ -500,7 +498,7 @@ def admin_new_task(request):
     cursor.execute('SELECT competition_name FROM Competitions WHERE id = ?', (request.GET['competition_id'],))
     competition_name = cursor.fetchone()[0]
     if request.method == 'GET':
-        return render(request, 'admin/new_task.html', context={'form': forms.NewTaskForm(),
+        return render(request, 'new_task.html', context={'form': forms.NewTaskForm(),
                                                                'name': competition_name,
                                                                'competition_id': request.GET['competition_id']})
     else:
@@ -523,8 +521,8 @@ def admin_new_task(request):
 def admin_main(request):
     if not check_admin(request):
         return HttpResponseRedirect('/main')
-    return render(request, "admin/admin.html", context={"competitions": admin_competitions_table(request),
-                                                        'is_superuser': request.user.is_superuser})
+    return render(request, "admin.html", context={"competitions": admin_competitions_table(request),
+                                                  'is_superuser': request.user.is_superuser})
 
 
 ########################################################################################################################
@@ -581,10 +579,8 @@ def task_solutions_table(task_id, username):
 def main(request):
     if not check_login(request):
         return HttpResponseRedirect('/enter')
-    if request.user.is_staff:
-        return render(request, "admin/main.html", context={"competitions": competitions_table(request)})
-    else:
-        return render(request, "competitor/main.html", context={"competitions": competitions_table(request)})
+    return render(request, "main.html", context={"competitions": competitions_table(request),
+                                                 'is_admin': request.user.is_staff})
 
 
 def redirect(request):
@@ -597,13 +593,9 @@ def competition(request):
     connector, cursor = open_db()
     cursor.execute('SELECT competition_name FROM Competitions WHERE id = ?', (request.GET['competition_id'],))
     name = cursor.fetchone()[0]
-    if request.user.is_staff:
-        return render(request, "admin/competition.html", context={"name": name,
-                                                                  'tasks': tasks_table(request.GET['competition_id'])})
-    else:
-        return render(request, "competitor/competition.html", context={"name": name,
-                                                                       'tasks': tasks_table(
-                                                                           request.GET['competition_id'])})
+    return render(request, "competition.html", context={"name": name,
+                                                        'tasks': tasks_table(request.GET['competition_id']),
+                                                        'is_admin': request.user.is_staff})
 
 
 def task(request):
@@ -626,12 +618,10 @@ def task(request):
             'specifications': this_task[6].replace('\n', '<br>'),
             'form': forms.FileForm(),
             'solutions': task_solutions_table(this_task[0], request.user.username),
-            'competition_id': this_task[2]
+            'competition_id': this_task[2],
+            'is_admin': request.user.is_staff
         }
-        if request.user.is_staff:
-            return render(request, "admin/task.html", context=context)
-        else:
-            return render(request, "competitor/task.html", context=context)
+        return render(request, "task.html", context=context)
     else:
         if 'file' in request.FILES.keys():
             file = request.FILES['file']
@@ -658,31 +648,8 @@ def task(request):
         return HttpResponseRedirect('/task?task_id=' + str(this_task[0]))
 
 
-def settings_fabric(request, context):
-    if request.user.is_staff:
-        return render(request, 'admin/settings.html', context=context)
-    else:
-        return render(request, 'competitor/settings.html', context=context)
-
-
 def settings(request):
-    if not check_login(request):
-        return HttpResponseRedirect('/enter')
-    context = {'username': request.user.username}
-    if request.method == 'POST':
-        old = request.POST['old']
-        new = request.POST['new']
-        again = request.POST['again']
-        user = authenticate(username=request.user.username, password=old)
-        if not user:
-            context['error'] = 'Пароль неверный'
-        elif new != again:
-            context['error'] = 'Пароли не совпадают'
-        else:
-            context['error'] = 'Пароль успешно изменен'
-            user.set_password(new)
-            user.save()
-    return settings_fabric(request, context)
+    return render(request, 'settings.html', context={'is_admin': request.user.is_staff})
 
 
 def restore(request):

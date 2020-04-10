@@ -1,0 +1,27 @@
+<!DOCTYPE html>
+{% load static %}
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>{{ name }}</title>
+    <link rel="stylesheet" type="text/css" href={% static "css/styles.css" %}>
+    <script type="text/javascript" src={% static "js/scripts.js" %}></script>
+</head>
+<body>
+    <div>
+        {% if is_admin %}
+            <button class="button_header_admin" onclick="main()">Главная</button><button class="button_header_admin" onclick="admin()">Админка</button><button class="button_header_admin" onclick="settings()">Настройки</button><button class="button_header_admin" onclick="logout()">Выход</button>
+        {% else %}
+                <button class="button_header" onclick="main()">Главная</button><button class="button_header" onclick="settings()">Настройки</button><button class="button_header" onclick="logout()">Выход</button>
+        {% endif %}
+        <hr>
+    </div>
+    <div style="text-align: center;"><h1>{{ name }}</h1></div>
+    <div><h2>Tasks</h2></div>
+    <div>
+        {% autoescape off %}
+            {{ tasks }}
+        {% endautoescape %}
+    </div>
+</body>
+</html>
