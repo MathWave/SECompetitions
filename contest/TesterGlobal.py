@@ -34,7 +34,7 @@ def is_project(path):
 
 def build_and_copy(path, working_dir):
     from os.path import exists, join
-    from contest.methods import shell
+    from contest.extra_funcs import shell
     name = path.split('/')[-1]
     rm_dir = path + '/bin/Debug'
     rmtree(rm_dir)
@@ -59,7 +59,7 @@ class TesterGlobal(Thread):
         from os import system, listdir, mkdir
         from os.path import join, isdir
         from shutil import copyfile
-        from contest.methods import shell, open_db, close_db
+        from contest.extra_funcs import shell, open_db, close_db
         working_dir = join(sln_path, test_folder_name(sln_path))
         mkdir(working_dir)
         copyfile(dll_path, join(working_dir, str(self.task_id) + '.dll'))
