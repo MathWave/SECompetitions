@@ -14,6 +14,17 @@ def get_new_user_inputs():
     return line
 
 
+def user_role(value):
+    if value == 0:
+        return 'Студент'
+    elif value == 1:
+        return 'Ассистент'
+    elif value == 2:
+        return 'Преподаватель'
+    else:
+        return 'Бог'
+
+
 def user_table():
     columns_ru = ['Фамилия', 'Имя', 'Отчество', 'Группа', 'Почта', 'Роль']
     line = '<tr>'
@@ -26,8 +37,9 @@ def user_table():
     close_db(connector)
     for user in sorted(users, key=users_sorting_key):
         line += '<tr>'
-        for field in user:
-            line += '<td>' + field + '</td>'
+        for field in range(5):
+            line += '<td>' + user[field] + '</td>'
+        line += '<td>' + user_role(user[5]) + '</td>'
         line += '<td><input type="button" onclick=delete_user("' + user[4] + '") value=Удалить></td></tr>'
     return line
 

@@ -23,12 +23,33 @@ def check_login(request):
     return request.user.is_authenticated
 
 
-def check_admin(request):
-    return check_login(request) and request.user.is_staff
+def get_user(request):
+    connector, cursor = open_db()
+    cursor.execute('SELECT * FROM Users WHERE email = ?', (request.user.username,))
+    user = cursor.fetchone()
+    close_db(connector)
+    return user
 
 
-def check_superuser(request):
-    return check_admin(request) and request.user.is_superuser
+def check_assistant(request):
+    if not check_login(request):
+        return False
+    user = get_user(request)
+    return user[5] > 0
+
+
+def check_teacher(request):
+    if not check_login(request):
+        return False
+    user = get_user(request)
+    return user[5] > 1
+
+
+def check_god(request):
+    if not check_login(request):
+        return False
+    user = get_user(request)
+    return user[5] > 2
 
 
 def check_permission(username, competition_id):
