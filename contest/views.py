@@ -38,13 +38,17 @@ def superuser(request):
                            (is_staff, is_superuser, request.POST['user']))
             close_db(connector)
         else:
+            email = request.POST['email']
+            connector, cursor = open_db()
+            cursor.execute('SELECT * FROM Users WHERE email = ?', (email,))
+            if cursor.fetchone():
+                return
             password = generate_password()
             text = 'Login: ' + request.POST['email'] + '\r\n'
             text += 'Password: ' + password
             from threading import Thread
             Thread(target=(lambda: send_email('Welcome to SECompetitions!', request.POST['email'],
                                               'secompetitionssender@gmail.com', text))).start()
-            connector, cursor = open_db()
             cursor.execute('INSERT INTO Users VALUES (?, ?, ?, ?, ?, ?)', (
                 request.POST['surname'],
                 request.POST['name'],
