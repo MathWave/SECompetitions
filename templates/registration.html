@@ -1,0 +1,102 @@
+<!DOCTYPE html>
+{% load static %}
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Регистрация</title>
+    <link rel="stylesheet" type="text/css" href={% static "css/styles.css" %}>
+    <script type="text/javascript" src={% static "js/scripts.js" %}></script>
+    <style>
+        td {
+            width: 50%;
+        }
+    </style>
+</head>
+<body>
+    <div>
+        <h1>
+            <a href="http://192.168.1.8:8000/enter">SECompetitions</a>
+        </h1>
+        <hr>
+    </div>
+    <div>
+        <font color="red">{{ error }}</font>
+        <form method="POST">
+            {% csrf_token %}
+            <table>
+                <tr>
+                    <td>
+                        Фамилия
+                    </td>
+                    <td>
+                        <label>
+                            <input type="text" name="surname" class="input_simple">
+                        </label>
+                    </td>
+                </tr>
+                <tr>
+                    <td>
+                        Имя
+                    </td>
+                    <td>
+                        <label>
+                            <input type="text" name="name" class="input_simple">
+                        </label>
+                    </td>
+                </tr>
+                <tr>
+                    <td>
+                        Отчество
+                    </td>
+                    <td>
+                        <label>
+                            <input type="text" name="middle_name" class="input_simple">
+                        </label>
+                    </td>
+                </tr>
+                <tr>
+                    <td>
+                        Группа
+                    </td>
+                    <td>
+                        <label>
+                            <input type="text" name="group_name" class="input_simple">
+                        </label>
+                    </td>
+                </tr>
+                <tr>
+                    <td>
+                        Почта
+                    </td>
+                    <td>
+                        <label>
+                            <input type="email" name="email" class="input_simple">
+                        </label>
+                    </td>
+                </tr>
+                <tr>
+                    <td>
+                        Пароль
+                    </td>
+                    <td>
+                        <label>
+                            <input type="password" name="password" class="input_simple">
+                        </label>
+                    </td>
+                </tr>
+                <tr>
+                    <td>
+                        Еще раз
+                    </td>
+                    <td>
+                        <label>
+                            <input type="password" name="again" class="input_simple">
+                        </label>
+                    </td>
+                </tr>
+            </table>
+            <input type="submit" value="Зарегестрироваться" class="enter_simple">
+        </form>
+    </div>
+</body>
+</html>

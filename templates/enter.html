@@ -11,17 +11,27 @@
 		<script type="text/javascript" src={% static "js/scripts.js" %}></script>
 	</head>
 	<body>
-		<center>
-			<h1>
-				<font color="black">SECompetitions</font>
-			</h1>
-			<form method="POST">
-				{% csrf_token %}
-				<table>
-					{{form}}
-				</table>
-				<input type="submit" value="Войти" class=enter_simple>
-			</form>
-		</center>
+        <center>
+            <div>
+                <h1>
+                    <font color="black">SECompetitions</font>
+                </h1>
+            </div>
+            <div>
+                <form method="POST">
+                    {% csrf_token %}
+                    <table>
+                        {{ form }}
+                    </table>
+                    <input type="submit" value="Войти" class=enter_simple>
+                </form>
+            </div>
+            <div>
+                <button onclick="restore()" class="enter_simple">Восстановить пароль</button>
+            </div>
+            <div>
+                <button onclick="registration()" class="enter_simple">Регистрация</button>
+            </div>
+        </center>
 	</body>
 </html>

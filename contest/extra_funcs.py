@@ -19,6 +19,26 @@ def close_db(connector):
     connector.close()
 
 
+def random_string():
+    from random import choice
+    letters = 'qwertyuiopasdfghjklzxcvbnm1234567890QWERTYUIOPASDFGHJKLZXCVBNM'
+    password = ''
+    for i in range(20):
+        password += choice(letters)
+    return password
+
+
+def get_restore_hash():
+    connector, cursor = open_db()
+    cursor.execute('SELECT * FROM Restores')
+    available = [a[0] for a in cursor.fetchall()]
+    while True:
+        s = random_string()
+        if s not in available:
+            break
+    return s
+
+
 def check_login(request):
     return request.user.is_authenticated
 
@@ -56,13 +76,13 @@ def check_permission(username, competition_id):
     connector, cursor = open_db()
     cursor.execute('SELECT * FROM Permissions WHERE username = ? AND competition_id = ?', (username, competition_id))
     out = cursor.fetchall()
-    cursor.execute('SELECT * FROM auth_user WHERE username = ? AND is_superuser = 1', (username,))
+    cursor.execute('SELECT * FROM Users WHERE email = ? AND role_id = 3', (username,))
     is_superuser = len(cursor.fetchall()) != 0
     close_db(connector)
     return len(out) != 0 or is_superuser
 
 
-def send_email(subject, to_addr, from_addr, body_text):
+def send(subject, to_addr, from_addr, body_text):
     import smtplib
 
     body = "\r\n".join((
@@ -80,11 +100,6 @@ def send_email(subject, to_addr, from_addr, body_text):
     server.quit()
 
 
-def generate_password():
-    from random import choice
-    letters = 'qwertyuiopasdfghjklzxcvbnm1234567890QWERTYUIOPASDFGHJKLZXCVBNM'
-    password = ''
-    for i in range(20):
-        password += choice(letters)
-    return password
-
+def send_email(subject, to_addr, from_addr, body_text):
+    from threading import Thread
+    Thread(target=lambda: send(subject, to_addr, from_addr, body_text)).start()

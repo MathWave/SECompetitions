@@ -59,9 +59,8 @@ button:hover {
 	background-color: black;
 }
 td {
-	padding-top: 20px;
-	padding-bottom: 20px;
-	width: 20%;
+	padding: 20px;
+	margin: 20px;
 }
 div {
 	padding-left: 10%;

@@ -27,15 +27,14 @@ def superuser(request):
     if request.method == 'POST':
         if 'role' in request.POST.keys():
             connector, cursor = open_db()
-            cursor.execute('UPDATE Users SET role = ? WHERE email = ?;', (request.POST['role'], request.POST['user']))
             if request.POST['role'] == 'user':
-                is_staff, is_superuser = 0, 0
+                role_id = 0
             elif request.POST['role'] == 'admin':
-                is_staff, is_superuser = 1, 0
+                role_id = 1
             else:
-                is_staff, is_superuser = 1, 1
-            cursor.execute('UPDATE auth_user SET is_staff = ?, is_superuser = ? WHERE username = ?',
-                           (is_staff, is_superuser, request.POST['user']))
+                role_id = 2
+            cursor.execute('UPDATE Users SET role_id = ? WHERE email = ?',
+                           (role_id, request.POST['user']))
             close_db(connector)
         else:
             email = request.POST['email']
@@ -43,7 +42,7 @@ def superuser(request):
             cursor.execute('SELECT * FROM Users WHERE email = ?', (email,))
             if cursor.fetchone():
                 return
-            password = generate_password()
+            password = random_string()
             text = 'Login: ' + request.POST['email'] + '\r\n'
             text += 'Password: ' + password
             from threading import Thread
@@ -78,9 +77,11 @@ def delete_task(request):
     close_db(connector)
     from shutil import rmtree
     from os import remove
+    from os.path import exists
     for i in solutions_ids:
         rmtree('../data/solutions/' + str(i))
-    remove('../data/tests/' + str(task_id) + '.dll')
+    if exists('../data/tests/' + str(task_id) + '.dll'):
+        remove('../data/tests/' + str(task_id) + '.dll')
     return HttpResponseRedirect('/admin/competition?competition_id=' + str(competition_id))
 
 
@@ -92,12 +93,14 @@ def delete_competition(request):
     cursor.execute('SELECT * FROM Tasks WHERE competition_id = ?', (competition_id,))
     task_ids = [(i[0],) for i in cursor.fetchall()]
     from os import remove
+    from os.path import exists
     from shutil import rmtree
     for i in task_ids:
         cursor.execute('SELECT * FROM Solutions WHERE task_id = ?;', i)
         for s in cursor.fetchall():
             rmtree('../data/solutions/' + str(s[0]))
-        remove('../data/tests/' + str(i[0]) + '.dll')
+        if exists('../data/tests/' + str(i[0]) + '.dll'):
+            remove('../data/tests/' + str(i[0]) + '.dll')
     cursor.executemany('DELETE FROM Solutions WHERE task_id = ?', task_ids)
     cursor.execute('DELETE FROM Tasks WHERE competition_id = ?', (competition_id,))
     cursor.execute('DELETE FROM Competitions WHERE id = ?', (competition_id,))
@@ -133,6 +136,8 @@ def show_file(request):
     task_info = cursor.fetchone()
     cursor.execute('SELECT * FROM Competitions WHERE id = ?', (task_info[2],))
     comp = cursor.fetchone()
+    cursor.execute('SELECT * FROM Users WHERE email = ?', (info[2],))
+    username = ' '.join(cursor.fetchone()[0:3])
     close_db(connector)
     if not check_permission(request.user.username, comp[0]):
         return HttpResponseRedirect('/main')
@@ -145,7 +150,7 @@ def show_file(request):
         return HttpResponseRedirect('/admin/solution?solution_id=' + str(solution_id) + '&folder=' + folder)
     return render(request, 'show_file.html', context={'competition': comp[1],
                                                       'task': task_info[1],
-                                                      'username': info[2],
+                                                      'username': username,
                                                       'id': solution_id,
                                                       'filename': rootdir.split('/')[-1],
                                                       'verdict': info[3],
@@ -169,7 +174,7 @@ def solution(request):
     if folder:
         files += '<div><img src="http://icons.iconarchive.com/icons/icons8/ios7/16/Very-Basic-Opened-Folder-icon.png'
         split_folder = folder.split('/')
-        files += '">    <a href=http://127.0.0.1:8000/admin/solution?solution_id=' + str(solution_id) + '&folder=' + \
+        files += '">    <a href=http://192.168.1.8:8000/admin/solution?solution_id=' + str(solution_id) + '&folder=' + \
                  quote('/'.join(split_folder[0:len(split_folder) - 1]), safe='') + '>..</div>\n'
     from os import listdir
     from os.path import isfile, join
@@ -180,22 +185,24 @@ def solution(request):
         if isfile(current_file):
             files += 'http://icons.iconarchive.com/icons/icons8/windows-8/16/Very-Basic-Document-icon.png'
             f = '/'.join(rootdir.split('/')[6:])
-            files += '">    <a href=http://127.0.0.1:8000/admin/show_file?solution_id=' + str(solution_id) + '&file=' + \
+            files += '">    <a href=http://192.168.1.8:8000/admin/show_file?solution_id=' + str(solution_id) + '&file=' + \
                      quote('/'.join(current_file.split('/')[4:]), safe='') + '>' + file + '</div>\n'
         else:
             files += 'http://icons.iconarchive.com/icons/icons8/ios7/16/Very-Basic-Opened-Folder-icon.png'
-            files += '">    <a href=http://127.0.0.1:8000/admin/solution?solution_id=' + str(solution_id) + '&folder=' + \
+            files += '">    <a href=http://192.168.1.8:8000/admin/solution?solution_id=' + str(solution_id) + '&folder=' + \
                      quote('/'.join(current_file.split('/')[4:]), safe='') + '>' + file + '</div>\n'
     cursor.execute('SELECT * FROM Tasks WHERE id = ?', (info[1],))
     task_info = cursor.fetchone()
     cursor.execute('SELECT * FROM Competitions WHERE id = ?', (task_info[2],))
     competition = cursor.fetchone()
+    cursor.execute('SELECT * FROM Users WHERE email = ?', (info[2],))
+    username = ' '.join(cursor.fetchone()[0:3])
     close_db(connector)
     if not check_permission(request.user.username, competition[0]):
         return HttpResponseRedirect('/main')
     return render(request, 'solution.html', context={'competition': competition[1],
                                                      'task': task_info[1],
-                                                     'username': info[2],
+                                                     'username': username,
                                                      'id': info[0],
                                                      'verdict': info[3],
                                                      'files': files,
@@ -264,7 +271,7 @@ def competition_settings(request):
                   context={"name": name,
                            'tasks': admin_tasks_table(request.GET['competition_id']),
                            'competition_id': request.GET['competition_id'],
-                           'is_superuser': request.user.is_superuser,
+                           'is_superuser': check_teacher(request),
                            'permissions_table': permissions_table(request.GET['competition_id'])})
 
 
@@ -281,7 +288,7 @@ def task_settings(request):
     context = {'competition': competition_name, 'task': this_task[1], 'legend': this_task[3], 'input': this_task[4],
                'output': this_task[5], 'specifications': this_task[6], 'tests_uploaded': bool(this_task[7]),
                'tests': forms.TestsForm(), 'competition_id': this_task[2], 'task_id': request.GET['task_id'],
-               'is_superuser': request.user.is_superuser}
+               'is_superuser': check_teacher(request)}
     if request.method == 'POST':
         have_tests = int('tests' in request.FILES.keys())
         cursor.execute("UPDATE Tasks SET "
@@ -343,14 +350,14 @@ def admin(request):
     if not check_assistant(request):
         return HttpResponseRedirect('/main')
     return render(request, "admin.html", context={"competitions": admin_competitions_table(request),
-                                                  'is_superuser': request.user.is_superuser})
+                                                  'is_superuser': check_god(request)})
 
 
 def main(request):
     if not check_login(request):
         return HttpResponseRedirect('/enter')
     return render(request, "main.html", context={"competitions": competitions_table(request),
-                                                 'is_admin': request.user.is_staff})
+                                                 'is_admin': check_assistant(request)})
 
 
 def redirect(request):
@@ -365,7 +372,7 @@ def competition(request):
     name = cursor.fetchone()[0]
     return render(request, "competition.html", context={"name": name,
                                                         'tasks': tasks_table(request.GET['competition_id']),
-                                                        'is_admin': request.user.is_staff})
+                                                        'is_admin': check_assistant(request)})
 
 
 def task(request):
@@ -389,7 +396,7 @@ def task(request):
             'form': forms.FileForm(),
             'solutions': task_solutions_table(this_task[0], request.user.username),
             'competition_id': this_task[2],
-            'is_admin': request.user.is_staff
+            'is_admin': check_assistant(request)
         }
         return render(request, "task.html", context=context)
     else:
@@ -419,13 +426,73 @@ def task(request):
 
 
 def settings(request):
-    return render(request, 'settings.html', context={'is_admin': request.user.is_staff})
+    if not check_login(request):
+        return HttpResponseRedirect('/enter')
+    context = {'is_admin': check_assistant(request)}
+    if request.method == 'POST':
+        old = request.POST['old']
+        new = request.POST['new']
+        again = request.POST['again']
+        username = request.user.username
+        user = authenticate(username=username, password=old)
+        if user is None:
+            context['error'] = 'Неверный пароль'
+        elif new != again:
+            context['error'] = 'Пароли не совпадают'
+        else:
+            user.set_password(new)
+            user.save()
+            context['error'] = 'Пароль успешно изменен'
+            user = authenticate(username=username, password=new)
+            if user is not None and user.is_active:
+                login(request, user)
+                request.session['is_auth_ok'] = '1'
+    return render(request, 'settings.html', context=context)
+
+
+def reset_password(request):
+    code = request.GET['code']
+    connector, cursor = open_db()
+    cursor.execute('SELECT * FROM Restores WHERE code = ?', (code,))
+    pair = cursor.fetchone()
+    if not pair:
+        return HttpResponseRedirect('/enter')
+    if request.method == 'GET':
+        return render(request, 'reset_password.html')
+    else:
+        if request.POST['password'] != request.POST['again']:
+            return render(request, 'reset_password.html', context={'error': 'Пароли не совпадают'})
+        else:
+            user = User.objects.get(username=pair[1])
+            user.set_password(request.POST['password'])
+            user.save()
+            cursor.execute('DELETE FROM Restores WHERE email = ?', (pair[1],))
+            close_db(connector)
+            return HttpResponseRedirect('/enter')
 
 
 def restore(request):
-    if not check_login(request):
-        return HttpResponseRedirect('/enter')
-    return HttpResponseRedirect("/main")
+    if check_login(request):
+        return HttpResponseRedirect("/main")
+    elif request.method == 'GET':
+        return render(request, 'restore.html')
+    else:
+        email = request.POST['email']
+        connector, cursor = open_db()
+        cursor.execute('SELECT * FROM Users WHERE email = ?', (email,))
+        if not cursor.fetchone():
+            return HttpResponseRedirect('/enter')
+        cursor.execute('SELECT * FROM Restores WHERE email = ?', (email,))
+        if cursor.fetchone():
+            return HttpResponseRedirect('/enter')
+        h = get_restore_hash()
+        cursor.execute('INSERT INTO Restores VALUES (?, ?)', (h, email))
+        close_db(connector)
+        send_email('Reset password',
+                   email,
+                   'secompetitionssender@gmail.com',
+                   'Restore your password using this link:\nhttp://192.168.1.8:8000/reset_password?code=' + h)
+    return HttpResponseRedirect('/enter')
 
 
 def enter(request):
@@ -444,6 +511,31 @@ def enter(request):
         return render(request, "enter.html", context={"form": loginform})
 
 
+def registration(request):
+    error = ''
+    if request.method == 'POST':
+        connector, cursor = open_db()
+        cursor.execute('SELECT * FROM Users WHERE email = ?', (request.POST['email'],))
+        if cursor.fetchone():
+            error = 'Пользователь с таким email уже существует'
+        elif request.POST['password'] != request.POST['again']:
+            error = 'Пароли не совпадают'
+        else:
+            cursor.execute('INSERT INTO Users VALUES (?, ?, ?, ?, ?, 0)', (
+                request.POST['surname'],
+                request.POST['name'],
+                request.POST['middle_name'],
+                request.POST['group_name'],
+                request.POST['email']
+            ))
+            close_db(connector)
+            user = User.objects.create(username=request.POST['email'])
+            user.set_password(request.POST['password'])
+            user.save()
+            return HttpResponseRedirect('/enter')
+    return render(request, 'registration.html', context={'error': error})
+
+
 def exit(request):
     logout(request)
     request.session["is_auth_ok"] = '0'
@@ -457,6 +549,7 @@ def reset(request):
     cursor.execute('DROP TABLE IF EXISTS Tasks;')
     cursor.execute('DROP TABLE IF EXISTS Users;')
     cursor.execute('DROP TABLE IF EXISTS Permissions;')
+    cursor.execute('DROP TABLE IF EXISTS Restores;')
     cursor.execute('DELETE FROM auth_user WHERE username != "admin"')
     cursor.execute(
         '''
@@ -508,6 +601,14 @@ def reset(request):
             id INTEGER PRIMARY KEY AUTOINCREMENT,
             username TEXT,
             competition_id INTEGER
+        );
+        '''
+    )
+    cursor.execute(
+        '''
+        CREATE TABLE Restores(
+            code TEXT,
+            email TEXT
         );
         '''
     )

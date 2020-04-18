@@ -1,4 +1,4 @@
-from contest.extra_funcs import open_db, close_db
+from contest.extra_funcs import *
 
 
 def users_sorting_key(x):
@@ -77,7 +77,7 @@ def role_table():
 # получить список соревнований
 def admin_competitions_table(request):
     connector, cursor = open_db()
-    if request.user.is_superuser:
+    if check_teacher(request):
         cursor.execute("SELECT * FROM Competitions")
     else:
         cursor.execute("SELECT * FROM Competitions INNER JOIN Permissions ON "
@@ -85,7 +85,7 @@ def admin_competitions_table(request):
     comps = cursor.fetchall()
     line = '<table>\n'
     for c in comps:
-        line += '<tr><td><a href="http://127.0.0.1:8000/admin/competition?competition_id=' + str(c[0]) + '">' + c[
+        line += '<tr><td><a href="http://192.168.1.8:8000/admin/competition?competition_id=' + str(c[0]) + '">' + c[
             1] + '</td></tr>\n'
     line += '</table>'
     close_db(connector)
@@ -99,7 +99,7 @@ def admin_tasks_table(competition_id):
     close_db(connector)
     line = '<table>\n'
     for c in tasks:
-        line += '<tr><td><a href="http://127.0.0.1:8000/admin/task?task_id=' + str(c[0]) + '">' + c[1] + '</td></tr>\n'
+        line += '<tr><td><a href="http://192.168.1.8:8000/admin/task?task_id=' + str(c[0]) + '">' + c[1] + '</td></tr>\n'
     line += '</table>'
     return line
 
@@ -113,7 +113,7 @@ def solutions_table(competition_id):
     table = '<tr><td><b>Id</b></td><td><b>Таск</b></td><td><b>Пользователь</b></td><td><b>Вердикт</b></td></tr>'
     for solution in reversed(solution_list):
         table += '<tr>\n'
-        table += "<td><a href='http://127.0.0.1:8000/admin/solution?solution_id=" + str(solution[0]) + "'>" + \
+        table += "<td><a href='http://192.168.1.8:8000/admin/solution?solution_id=" + str(solution[0]) + "'>" + \
                  str(solution[0]) + '</a></td>'
         table += '<td>' + str(solution[5]) + '</td>\n'
         table += '<td>' + ' '.join(solution[12:15]) + '</td>'
@@ -137,7 +137,7 @@ def permissions_table(competition_id):
 # получить список всех соревнований (потом надо будет сделать фильтр)
 def competitions_table(request):
     connector, cursor = open_db()
-    if request.user.is_superuser:
+    if check_teacher(request):
         cursor.execute("SELECT * FROM Competitions")
     else:
         cursor.execute("SELECT * FROM Competitions INNER JOIN Permissions ON "
@@ -145,7 +145,7 @@ def competitions_table(request):
     comps = cursor.fetchall()
     line = '<table>\n'
     for c in comps:
-        line += '<tr><td><a href="http://127.0.0.1:8000/competition?competition_id=' + str(c[0]) + '">' + c[
+        line += '<tr><td><a href="http://192.168.1.8:8000/competition?competition_id=' + str(c[0]) + '">' + c[
             1] + '</td></tr>\n'
     line += '</table>'
     close_db(connector)
@@ -159,7 +159,7 @@ def tasks_table(competition_id):
     tasks = cursor.fetchall()
     line = '<table>\n'
     for c in tasks:
-        line += '<tr><td><a href="http://127.0.0.1:8000/task?task_id=' + str(c[0]) + '">' + c[1] + \
+        line += '<tr><td><a href="http://192.168.1.8:8000/task?task_id=' + str(c[0]) + '">' + c[1] + \
                 '</td></tr>\n'
     line += '</table>'
     return line

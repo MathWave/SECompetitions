@@ -17,10 +17,10 @@ def test(solution_id, task_id, working_dir):
     connector, cursor = open_db()
     cursor.execute("UPDATE Solutions SET result = ? WHERE id = ?;", (res, solution_id))
     close_db(connector)
-    a = 5
 
 
 class Tester(Thread):
+
     def __init__(self, solution_id, task_id, working_dir):
         Thread.__init__(self)
         self.solution_id = solution_id

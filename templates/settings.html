@@ -19,8 +19,48 @@
             {% endif %}
             <hr>
 		</div>
-        <center>
-            <b><font size="+3">Скоро тут что-то появится</font></b>
-		</center>
+        <div>
+            <center>
+                <h1>
+                    Настройки
+                </h1>
+            </center>
+        </div>
+        <div>
+            <h2>
+                Сменить пароль
+            </h2>
+            <font color="red">{{ error }}</font>
+            <form method="POST">
+                {% csrf_token %}
+                <table>
+                    <tr>
+                        <td>
+                            Старый пароль
+                        </td>
+                        <td>
+                            <input type="password" name="old" class="input_simple">
+                        </td>
+                    </tr>
+                    <tr>
+                        <td>
+                            Новый пароль
+                        </td>
+                        <td>
+                            <input type="password" name="new" class="input_simple">
+                        </td>
+                    </tr>
+                    <tr>
+                        <td>
+                            Еще раз
+                        </td>
+                        <td>
+                            <input type="password" name="again" class="input_simple">
+                        </td>
+                    </tr>
+                </table>
+                <input type="submit" class="enter_simple" value="Сменить">
+            </form>
+        </div>
 	</body>
 </html>
