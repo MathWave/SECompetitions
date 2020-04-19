@@ -46,7 +46,7 @@ def superuser(request):
             text = 'Login: ' + request.POST['email'] + '\r\n'
             text += 'Password: ' + password
             from threading import Thread
-            Thread(target=(lambda: send_email('Welcome to SECompetitions!', request.POST['email'],
+            Thread(target=(lambda: send_email('Welcome to Sprint!', request.POST['email'],
                                               'secompetitionssender@gmail.com', text))).start()
             cursor.execute('INSERT INTO Users VALUES (?, ?, ?, ?, ?, ?)', (
                 request.POST['surname'],
