@@ -63,12 +63,14 @@ def users_sorting_key(x):
 
 def user_role(value):
     user = User.objects.get(username=value)
-    if user.is_staff == 0:
-        return 'Студент'
-    elif user.is_superuser == 0:
-        return 'Преподаватель'
-    else:
+    if user.is_superuser:
         return 'Бог'
+    elif user.is_staff:
+        return 'Преподаватель'
+    elif is_assistant(value):
+        return 'Ассистент'
+    else:
+        return 'Студент'
 
 
 def all_users():

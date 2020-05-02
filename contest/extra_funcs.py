@@ -49,16 +49,20 @@ def check_login(request):
     return request.user.is_authenticated
 
 
+def is_assistant(username):
+    connector, cursor = open_db()
+    cursor.execute('SELECT * FROM Subscribes WHERE username = ? AND is_assistant != 0', (username,))
+    l = cursor.fetchall()
+    close_db(connector)
+    return len(l) > 0
+
+
 def check_assistant(request):
     if not check_login(request):
         return False
     if request.user.is_staff:
         return True
-    connector, cursor = open_db()
-    cursor.execute('SELECT * FROM Subscribes WHERE username = ? AND is_assistant != 0', (request.user.username,))
-    l = cursor.fetchall()
-    close_db(connector)
-    return len(l) > 0
+    return is_assistant(request.user.username)
 
 
 def check_teacher(request):

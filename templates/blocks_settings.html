@@ -26,6 +26,7 @@
         {% endif %}
         <hr>
     </div>
+    {% if is_superuser %}
     <div><h2>Ограничения по времени</h2></div>
     <div>
         <form method="POST">
@@ -47,6 +48,7 @@
         </form>
         <hr>
     </div>
+    {% endif %}
     <div>
         <div style="text-align: center;">
             <input type="submit" class="enter_simple" onclick="solutions({{ block_id }})" value="Посмотреть посылки">
