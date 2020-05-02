@@ -3,7 +3,7 @@
 <html lang="en">
 <head>
     <meta charset="UTF-8">
-    <title>Новое соревнование</title>
+    <title>Новое Блок</title>
     <link rel="stylesheet" type="text/css" href={% static "css/styles.css" %}>
     <script type="text/javascript" src={% static "js/scripts.js" %}></script>
 </head>
@@ -13,6 +13,11 @@
         <hr>
     </div>
     <div>
+        <center>
+            <h1>
+                {{ name }}
+            </h1>
+        </center>
         <form method="POST">
             {% csrf_token %}
             <table>

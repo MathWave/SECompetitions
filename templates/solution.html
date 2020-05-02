@@ -22,10 +22,10 @@
             <table border="1px solid black">
                 <tr>
                     <td>
-                        Соревнование:
+                        Блок:
                     </td>
                     <td>
-                        {{ competition }}
+                        {{ block }}
                     </td>
                 </tr>
                 <tr>
@@ -62,7 +62,7 @@
                 </tr>
             </table>
         </h3>
-        <center><h1><a href="http://192.168.1.8:8000/admin/solutions?competition_id={{ competition_id }}">Обратно к посылкам</a></h1></center>
+        <center><h1><a href="http://192.168.1.8:8000/admin/solutions?block_id={{ block_id }}">Обратно к посылкам</a></h1></center>
         <h2>Files</h2>
         <h3>{{ folder }}</h3>
     </div>
