@@ -233,7 +233,7 @@ def solution(request):
     if folder:
         files += '<div><img src="http://icons.iconarchive.com/icons/icons8/ios7/16/Very-Basic-Opened-Folder-icon.png'
         split_folder = folder.split('/')
-        files += '">    <a href=http://192.168.1.8:8000/admin/solution?solution_id=' + str(solution_id) + '&folder=' + \
+        files += '">    <a href=http://mathwave.pythonanywhere.com/admin/solution?solution_id=' + str(solution_id) + '&folder=' + \
                  quote('/'.join(split_folder[0:len(split_folder) - 1]), safe='') + get_req(c) + '>..</div>\n'
     from os import listdir
     from os.path import isfile, join
@@ -244,11 +244,11 @@ def solution(request):
         if isfile(current_file):
             files += 'http://icons.iconarchive.com/icons/icons8/windows-8/16/Very-Basic-Document-icon.png'
             f = '/'.join(rootdir.split('/')[6:])
-            files += '">    <a href=http://192.168.1.8:8000/admin/show_file?solution_id=' + str(solution_id) + '&file=' + \
+            files += '">    <a href=http://mathwave.pythonanywhere.com/admin/show_file?solution_id=' + str(solution_id) + '&file=' + \
                      quote('/'.join(current_file.split('/')[4:]), safe='') + get_req(c) + '>' + file + '</div>\n'
         else:
             files += 'http://icons.iconarchive.com/icons/icons8/ios7/16/Very-Basic-Opened-Folder-icon.png'
-            files += '">    <a href=http://192.168.1.8:8000/admin/solution?solution_id=' + str(solution_id) + '&folder=' + \
+            files += '">    <a href=http://mathwave.pythonanywhere.com/admin/solution?solution_id=' + str(solution_id) + '&folder=' + \
                      quote('/'.join(current_file.split('/')[4:]), safe='') + get_req(c) + '>' + file + '</div>\n'
     cursor.execute('SELECT * FROM Tasks WHERE id = ?', (info[1],))
     task_info = cursor.fetchone()
@@ -274,9 +274,9 @@ def solution(request):
         pass
     else:
         if cur != 0:
-            left = '<a href="http://192.168.1.8:8000/admin/solution?solution_id=' + str(sols[cur - 1]['solution_id']) + req + '"><-</a>'
+            left = '<a href="http://mathwave.pythonanywhere.com/admin/solution?solution_id=' + str(sols[cur - 1]['solution_id']) + req + '"><-</a>'
         if cur != len(sols) - 1:
-            right = '<a href="http://192.168.1.8:8000/admin/solution?solution_id=' + str(sols[cur + 1]['solution_id']) + req + '">-></a>'
+            right = '<a href="http://mathwave.pythonanywhere.com/admin/solution?solution_id=' + str(sols[cur + 1]['solution_id']) + req + '">-></a>'
     return render(request, 'solution.html', context={'info_table': solution_info_table(solution_id),
                                                      'block_id': task_info[2],
                                                      'req': back_req,
@@ -576,7 +576,7 @@ def restore(request):
         send_email('Reset password',
                    email,
                    'seblockssender@gmail.com',
-                   'Restore your password using this link:\nhttp://192.168.1.8:8000/reset_password?code=' + h)
+                   'Restore your password using this link:\nhttp://mathwave.pythonanywhere.com/reset_password?code=' + h)
     return HttpResponseRedirect('/enter')
 
 

@@ -49,10 +49,10 @@
             if (best_result) {
                 req += '&best_result=' + best_result;
             }
-            window.location.href = 'http://192.168.1.8:8000/admin/solutions?block_id={{ block_id }}' + req;
+            window.location.href = 'http://mathwave.pythonanywhere.com/admin/solutions?block_id={{ block_id }}' + req;
         }
         function download() {
-            window.location.href = 'http://192.168.1.8:8000/admin/download?{{ req }}'
+            window.location.href = 'http://mathwave.pythonanywhere.com/admin/download?{{ req }}'
         }
     </script>
 </head>
@@ -62,7 +62,7 @@
         <hr>
     <div style="text-align: center;"><h1>{{ name }}</h1></div>
     <h1 style="text-align: center;">
-        <a href="http://192.168.1.8:8000/admin/block?block_id={{ block_id }}">Обратно к настройкам блока</a>
+        <a href="http://mathwave.pythonanywhere.com/admin/block?block_id={{ block_id }}">Обратно к настройкам блока</a>
     </h1>
     <h2>Решения</h2>
     </div>

@@ -424,11 +424,11 @@
       <screen x="0" y="0" width="1680" height="1050" />
     </state>
     <state x="528" y="260" key="#com.intellij.openapi.updateSettings.impl.PluginUpdateInfoDialog/0.0.1680.1050@0.0.1680.1050" timestamp="1586123018060" />
-    <state x="421" y="23" width="915" height="945" key="CommitChangelistDialog2" timestamp="1588430913876">
+    <state x="421" y="23" width="915" height="945" key="CommitChangelistDialog2" timestamp="1589044248991">
       <screen x="0" y="0" width="1680" height="1050" />
     </state>
     <state x="421" y="40" key="CommitChangelistDialog2/1680.-157.1920.1057/0.0.1680.1050@0.0.1680.1050" timestamp="1586376905075" />
-    <state x="421" y="23" width="915" height="945" key="CommitChangelistDialog2/1680.-180.1920.1080/0.0.1680.1050@0.0.1680.1050" timestamp="1588430913876" />
+    <state x="421" y="23" width="915" height="945" key="CommitChangelistDialog2/1680.-180.1920.1080/0.0.1680.1050@0.0.1680.1050" timestamp="1589044248991" />
     <state x="421" y="40" key="CommitChangelistDialog2/1680.0.1920.1080/0.0.1680.1050/-108.-1080.1920.1080@0.0.1680.1050" timestamp="1587257023611" />
     <state x="421" y="40" key="CommitChangelistDialog2/1680.0.1920.1080/0.0.1680.1050/-1139.-1080.1920.1080@0.0.1680.1050" timestamp="1586521779408" />
     <state x="421" y="23" key="CommitChangelistDialog2/1680.23.1920.1057/0.23.1680.945/-108.-1057.1920.1057@0.23.1680.945" timestamp="1586622015703" />
@@ -545,11 +545,11 @@
       <screen x="0" y="0" width="1680" height="1050" />
     </state>
     <state x="341" y="164" key="SettingsEditor/1680.-180.1920.1080/0.0.1680.1050@0.0.1680.1050" timestamp="1588429137258" />
-    <state x="440" y="261" key="Vcs.Push.Dialog.v2" timestamp="1588430915569">
+    <state x="440" y="261" key="Vcs.Push.Dialog.v2" timestamp="1589044250816">
       <screen x="0" y="0" width="1680" height="1050" />
     </state>
     <state x="440" y="261" key="Vcs.Push.Dialog.v2/1680.-157.1920.1057/0.0.1680.1050@0.0.1680.1050" timestamp="1586376906531" />
-    <state x="440" y="261" key="Vcs.Push.Dialog.v2/1680.-180.1920.1080/0.0.1680.1050@0.0.1680.1050" timestamp="1588430915569" />
+    <state x="440" y="261" key="Vcs.Push.Dialog.v2/1680.-180.1920.1080/0.0.1680.1050@0.0.1680.1050" timestamp="1589044250816" />
     <state x="440" y="261" key="Vcs.Push.Dialog.v2/1680.0.1920.1080/0.0.1680.1050/-108.-1080.1920.1080@0.0.1680.1050" timestamp="1587257025154" />
     <state x="440" y="261" key="Vcs.Push.Dialog.v2/1680.0.1920.1080/0.0.1680.1050/-1139.-1080.1920.1080@0.0.1680.1050" timestamp="1586521780997" />
     <state x="440" y="258" key="Vcs.Push.Dialog.v2/1680.23.1920.1057/0.23.1680.945/-108.-1057.1920.1057@0.23.1680.945" timestamp="1586622017840" />
@@ -561,10 +561,10 @@
       <screen x="0" y="0" width="1680" height="1050" />
     </state>
     <state x="622" y="444" key="com.intellij.openapi.vcs.update.UpdateOrStatusOptionsDialogupdate-v2/1680.-180.1920.1080/0.0.1680.1050@0.0.1680.1050" timestamp="1587238293865" />
-    <state x="326" y="234" width="858" height="582" key="find.popup" timestamp="1588508597305">
+    <state x="326" y="234" width="858" height="582" key="find.popup" timestamp="1589044354900">
       <screen x="0" y="0" width="1680" height="1050" />
     </state>
-    <state x="326" y="234" width="858" height="582" key="find.popup/1680.-180.1920.1080/0.0.1680.1050@0.0.1680.1050" timestamp="1588508597305" />
+    <state x="326" y="234" width="858" height="582" key="find.popup/1680.-180.1920.1080/0.0.1680.1050@0.0.1680.1050" timestamp="1589044354900" />
     <state x="411" y="234" width="858" height="582" key="find.popup/1680.0.1920.1080/0.0.1680.1050/-108.-1080.1920.1080@0.0.1680.1050" timestamp="1587327050041" />
   </component>
   <component name="XDebuggerManager">
