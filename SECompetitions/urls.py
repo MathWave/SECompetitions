@@ -26,6 +26,7 @@ urlpatterns = [
     path('admin/remove_tests', views.remove_tests),
     path('admin/users_settings', views.users_settings),
     path('admin/unsubscribe', views.unsubscribe),
+    path('admin/download', views.download),
 
     path('superuser/main', views.superuser),
     path('delete_user', views.delete_user),

@@ -13,7 +13,12 @@ def test(solution_id, task_id, working_dir):
     p.kill()
     from xml.dom.minidom import parse
     doc = parse(join(working_dir, 'TestResult.xml'))
-    res = doc.getElementsByTagName('test-suite')[0].getAttribute('result')
+    tag = doc.getElementsByTagName('test-run')[0]
+    passed, total = tag.getAttribute('passed'), tag.getAttribute('total')
+    if not passed or not total:
+        res = 'Test failure'
+    else:
+        res = passed + '/' + total
     connector, cursor = open_db()
     cursor.execute("UPDATE Solutions SET result = ? WHERE id = ?;", (res, solution_id))
     close_db(connector)

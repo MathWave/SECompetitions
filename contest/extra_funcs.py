@@ -104,6 +104,14 @@ def check_permission_admin(username, block_id):
     return result
 
 
+def dt(line):
+    date, time = line.split(' ')
+    date = list(map(int, date.split('-')))
+    time = list(map(int, time.split(':')))
+    from datetime import datetime, timedelta
+    return datetime(*date, hour=time[0], minute=time[1], second=time[2]) - timedelta(hours=3)
+
+
 def check_permission_student(username, block_id):
     if check_permission_admin(username, block_id):
         return True
@@ -113,8 +121,11 @@ def check_permission_student(username, block_id):
     cursor.execute('SELECT opened, time_start, time_end FROM Blocks WHERE id = ?', (block_id,))
     result = cursor.fetchone()
     close_db(connector)
-    from datetime import datetime
-    return result[0] and result[1] <= str(datetime.now()) <= result[2]
+    try:
+        from datetime import datetime
+        return result[0] and dt(result[1]) <= datetime.now() <= dt(result[2])
+    except:
+        return False
 
 
 def check_permission_course(username, course_id):
@@ -138,7 +149,7 @@ def send(subject, to_addr, from_addr, body_text):
 
     server = smtplib.SMTP('smtp.gmail.com', 587)
     server.starttls()
-    server.login('seblockssender@gmail.com', 'HSEguestHSEpassw0rd')
+    server.login('secompetitionssender@gmail.com', 'HSEguestHSEpassw0rd')
     server.sendmail(from_addr, [to_addr], body)
     server.quit()
 
@@ -166,6 +177,7 @@ def delete_task_extra(task_id):
 def delete_block_extra(block_id):
     connector, cursor = open_db()
     cursor.execute('DELETE FROM Blocks WHERE id = ?', (block_id,))
+    cursor.execute('DELETE FROM Marks WHERE block_id = ?', (block_id,))
     cursor.execute('SELECT * FROM Tasks WHERE block_id = ?', (block_id,))
     task_ids = [i[0] for i in cursor.fetchall()]
     close_db(connector)
@@ -187,7 +199,8 @@ def delete_course_extra(course_id):
 def available_blocks(username, role):
     connector, cursor = open_db()
     showable = {}
-    cursor.execute('SELECT * FROM Courses INNER JOIN Subscribes ON Subscribes.course_id = Courses.id WHERE username = ?', (username,))
+    cursor.execute('SELECT * FROM Courses '
+                   'INNER JOIN Subscribes ON Subscribes.course_id = Courses.id WHERE username = ?', (username,))
     for node in cursor.fetchall():
         showable[(node[0], node[1])] = []
     cursor.execute('SELECT * FROM Blocks INNER JOIN Courses ON Courses.id = Blocks.course_id')
@@ -201,3 +214,93 @@ def available_blocks(username, role):
             if check_permission_admin(username, node[0]):
                 showable[(node[-2], node[-1])].append((node[0], node[1]))
     return showable
+
+
+def set_mark(solution_id, mark):
+    connector, cursor = open_db()
+    cursor.execute(
+        'SELECT Tasks.block_id, Solutions.username FROM Solutions '
+        'INNER JOIN Tasks ON Tasks.id = Solutions.task_id '
+        'WHERE Solutions.id = ?', (solution_id,)
+    )
+    block_id, username = cursor.fetchone()
+    cursor.execute('UPDATE Marks SET mark = ? WHERE username = ? AND block_id = ?',
+                   (mark, username, block_id))
+    close_db(connector)
+
+
+def list_find(arr, predicate):
+    findable = []
+    for i in range(len(arr)):
+        if predicate(arr[i]):
+            findable.append(i)
+    return findable
+
+
+def solutions_by_request(request):
+    connector, cursor = open_db()
+    cursor.execute(
+        'SELECT A.id, B.id, B.task_name, C.email, C.group_name, '
+        'C.surname || " " || C.name || " " || C.middle_name, '
+        'A.result, D.mark FROM Solutions AS A '
+        'INNER JOIN Tasks AS B ON A.task_id = B.id '
+        'INNER JOIN Users AS C ON A.username = C.email '
+        'INNER JOIN Marks AS D ON D.username = A.username '
+        'AND D.block_id = B.block_id '
+        'WHERE B.block_id = ?', (request['block_id'],)
+    )
+    solutions = cursor.fetchall()
+    allowed = ['user', 'task_name', 'group']
+    solutions_json = [
+        {
+            'solution_id': solutions[i][0],
+            'task_id': solutions[i][1],
+            'task_name': solutions[i][2],
+            'username': solutions[i][3],
+            'group': solutions[i][4],
+            'user': solutions[i][5],
+            'result': solutions[i][6],
+            'mark': solutions[i][7]
+        }
+        for i in range(len(solutions))
+    ]
+    my_request = {key: request[key] for key in request.keys() if key != 'block_id'}
+    for key in my_request.keys():
+        if key in allowed:
+            solutions_json = [solution for solution in solutions_json if solution[key] == my_request[key]]
+    user_task = {(u['username'], u['task_id']): 0 for u in solutions_json}
+    if 'best_result' in request.keys():
+        for solution in solutions_json:
+            if int(solution['result'].split('/')[0]) > user_task[(solution['username'], solution['task_id'])]:
+                user_task[(solution['username'], solution['task_id'])] = int(solution['result'].split('/')[0])
+        solutions_json = [
+            solution for solution in solutions_json
+            if int(solution['result'].split('/')[0]) == user_task[(solution['username'], solution['task_id'])]
+        ]
+    if 'last_solution' in request.keys():
+        for u_t in user_task.keys():
+            found = list_find(solutions_json, lambda elem: elem['username'] == u_t[0] and elem['task_id'] == u_t[1])
+            for i in range(1, len(found)):
+                solutions_json.pop(len(found) - 1 - i)
+    return solutions_json
+
+
+def get_files(path):
+    from os import listdir
+    from os.path import isfile, join
+    files_dict = {}
+    for file in listdir(path):
+        current_file = join(path, file)
+        if isfile(current_file):
+            if not current_file.endswith('.csproj') and not current_file.endswith('.sln'):
+                try:
+                    files_dict['/'.join(current_file.split('/')[4:])] = open(current_file, 'r').read()
+                except:
+                    pass
+        else:
+            files_dict = {**files_dict, **get_files(current_file)}
+    return files_dict
+
+
+def get_req(request):
+    return ('&' + '&'.join(str(x) + '=' + str(request[x]) for x in request.keys())) if request else ''

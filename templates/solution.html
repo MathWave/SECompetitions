@@ -10,6 +10,15 @@
         td {
             padding-left: 15px;
         }
+        .my_div {
+            margin-left: 20%;
+            margin-right: 20%;
+            border: 3px black solid;
+            padding-top: 20px;
+            padding-bottom: 20px;
+            padding-left: 1%;
+            padding-right: 1%;
+        }
     </style>
 </head>
 <body>
@@ -19,52 +28,42 @@
     </div>
     <div>
         <h3>
-            <table border="1px solid black">
-                <tr>
-                    <td>
-                        Блок:
-                    </td>
-                    <td>
-                        {{ block }}
-                    </td>
-                </tr>
-                <tr>
-                    <td>
-                        Таск:
-                    </td>
-                    <td>
-                        {{ task }}
-                    </td>
-                </tr>
-                <tr>
-                    <td>
-                        Студент:
-                    </td>
-                    <td>
-                        {{ username }}
-                    </td>
-                </tr>
-                <tr>
-                    <td>
-                        Id посылки:
-                    </td>
-                    <td>
-                        {{ id }}
-                    </td>
-                </tr>
-                <tr>
-                    <td>
-                        Вердикт:
-                    </td>
-                    <td>
-                        {{ verdict }}
-                    </td>
-                </tr>
-            </table>
+            <form method="POST">
+                {% csrf_token %}
+                <table border="1px solid black">
+                {% autoescape off %}
+                    {{ info_table }}
+                {% endautoescape %}
+                </table>
+            </form>
         </h3>
-        <center><h1><a href="http://192.168.1.8:8000/admin/solutions?block_id={{ block_id }}">Обратно к посылкам</a></h1></center>
+    <center>
+        <table>
+            <tr>
+                <td>
+                    {% autoescape off %}
+                    {{ previous }}
+                    {% endautoescape %}
+                </td>
+                <td>
+                    <h1><a href="http://192.168.1.8:8000/admin/solutions?block_id={{ block_id }}{{ req }}">Обратно к посылкам</a></h1>
+                </td>
+                <td>
+                    {% autoescape off %}
+                    {{ next }}
+                    {% endautoescape %}
+                </td>
+            </tr>
+        </table>
+        </center>
         <h2>Files</h2>
-        <h3>{{ folder }}</h3>
+    </div>
+    {% autoescape off %}
+        {{ files_text }}
+    {% endautoescape %}
+    <div>
+    <hr>
+    <h3>{{ folder }}</h3>
     </div>
     {% autoescape off %}
     {{ files }}

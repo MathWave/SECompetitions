@@ -172,21 +172,19 @@ def admin_tasks_table(block_id):
     return line
 
 
-# посылки для данного блока
-def solutions_table(block_id):
-    connector, cursor = open_db()
-    cursor.execute('SELECT * FROM Solutions AS A INNER JOIN Tasks AS B ON A.Task_id = B.id '
-                   'INNER JOIN Users AS C ON A.username = C.email WHERE block_id = ?', (block_id,))
-    solution_list = cursor.fetchall()
-    close_db(connector)
-    table = '<tr><td><b>Id</b></td><td><b>Таск</b></td><td><b>Пользователь</b></td><td><b>Вердикт</b></td></tr>'
+# решения для данного блока
+def solutions_table(get_request):
+    solution_list = solutions_by_request(get_request)
+    table = '<tr><td><b>Id</b></td><td><b>Таск</b></td><td><b>Пользователь</b></td><td><b>Группа</b></td><td><b>Результат</b></td><td><b>Оценка</b></td></tr>'
     for solution in reversed(solution_list):
         table += '<tr>\n'
-        table += "<td><a href='http://192.168.1.8:8000/admin/solution?solution_id=" + str(solution[0]) + "'>" + \
-                 str(solution[0]) + '</a></td>'
-        table += '<td>' + str(solution[5]) + '</td>\n'
-        table += '<td>' + ' '.join(solution[12:15]) + '</td>'
-        table += '<td>' + str(solution[3]) + '</td>'
+        table += "<td><a href='http://192.168.1.8:8000/admin/solution?solution_id=" + str(solution['solution_id']) +\
+                 get_req(get_request) + "'>" + str(solution['solution_id']) + '</a></td>'
+        table += '<td>' + str(solution['task_name']) + '</td>\n'
+        table += '<td>' + solution['user'] + '</td>'
+        table += '<td>' + solution['group'] + '</td>'
+        table += '<td>' + solution['result'] + '</td>'
+        table += '<td>' + (str(solution['mark']) if solution['mark'] else "") + '</td>'
         table += '</tr>\n'
     return table
 
@@ -195,12 +193,15 @@ def solutions_table(block_id):
 def blocks_table(request):
     showable = available_blocks(request.user.username, 0)
     line = ''
+    connector, cursor = open_db()
+    cursor.execute('SELECT block_id, mark FROM Marks WHERE username = ?', (request.user.username,))
+    marks = {int(x[0]): int(x[1]) for x in cursor.fetchall()}
     for course in showable.keys():
         line += '<h2>' + course[1] + '</h2>\n'
         line += '<table>'
         for block in showable[course]:
             line += '<tr><td><a href="http://192.168.1.8:8000/block?block_id=' + str(block[0]) + '">' + \
-                    block[1] + '</td></tr>\n'
+                    block[1] + '</td><td><div style="border:thin solid black;padding:3px;">' + str(marks[block[0]]) + '</tr>\n'
         line += '</table>\n'
     return line
 
@@ -224,10 +225,59 @@ def task_solutions_table(task_id, username):
     cursor.execute('SELECT * FROM Solutions WHERE task_id = ? AND username = ?', (task_id, username))
     solution_list = cursor.fetchall()
     close_db(connector)
-    table = '<tr><td><b>Id</b></td><td><b>Вердикт</b></td></tr>'
+    table = '<tr><td><b>Id</b></td><td><b>Результат</b></td></tr>'
     for solution in reversed(solution_list):
         table += '<tr>\n'
         for i in 0, 3:
             table += '<td>' + str(solution[i]) + '</td>\n'
         table += '</tr>\n'
     return table
+
+
+def mark_select(mark=0):
+    line = '<select name=mark>'
+    for i in range(11):
+        if i == mark:
+            line += '<option selected value="' + str(i) + '">' + str(i) + '</option>'
+        else:
+            line += '<option value="' + str(i) + '">' + str(i) + '</option>'
+    line += '</select>'
+    return line
+
+
+def solution_info_table(solution_id):
+    connecot, cursor = open_db()
+    cursor.execute(
+        'SELECT C.id, D.email, C.block_name, B.task_name, D.surname || " " || D.name || " " || D.middle_name, A.id, A.result '
+        'FROM Solutions AS A '
+        'INNER JOIN Tasks AS B ON A.task_id = B.id '
+        'INNER JOIN Blocks AS C ON C.id = B.block_id '
+        'INNER JOIN Users AS D ON D.email = A.username '
+        'WHERE A.id = ?', (solution_id,)
+    )
+    info = cursor.fetchone()
+    line = ''
+    infos = ['Блок', 'Таск', 'Студент', 'ID решения', 'Результат']
+    for i in range(len(infos)):
+        line += '<tr><td>' + infos[i] + '</td><td>' + str(info[i + 2]) + '</td></tr>'
+    cursor.execute('SELECT mark FROM Marks WHERE block_id = ? AND username = ?', (info[0], info[1]))
+    mark = cursor.fetchone()
+    line += '<tr><td>Оценка</td><td>'
+    if not mark:
+        line += mark_select()
+    else:
+        line += mark_select(mark[0])
+    line += '<input type="submit" style="margin-left:15px;" value="Выставить"></td></tr>'
+    return line
+
+
+def solution_files_text(solution_id):
+    base_dir = '../data/solutions/' + str(solution_id) + '/'
+    files_dict = get_files(base_dir)
+    line = ''
+    for file in files_dict.keys():
+        line += '<div><h3>' + file + '<h3></div>'
+        line += '<div class="my_div"><p><pre>'
+        line += files_dict[file]
+        line += '</pre></p></div>'
+    return line

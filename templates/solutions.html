@@ -11,9 +11,50 @@
             padding-left: 15px;
         }
         table {
-            width: 75%;
+            width: 100%;
         }
     </style>
+    <script>
+        function change() {
+            const task = document.getElementById('task_name').value;
+            const user = document.getElementById('user').value;
+            const group = document.getElementById('group').value;
+            const last_solution = document.getElementById('last_solution').checked;
+            const best_result = document.getElementById('best_result').checked;
+            if (!task && !user && !group && !last_solution && !best_result) {
+                document.querySelector('#control').innerText = 'Сбросить'
+            } else {
+                document.querySelector('#control').innerText = 'Применить'
+            }
+        }
+        function filter() {
+            const task = document.getElementById('task_name').value;
+            const user = document.getElementById('user').value;
+            const group = document.getElementById('group').value;
+            const last_solution = document.getElementById('last_solution').checked;
+            const best_result = document.getElementById('best_result').checked;
+            var req = '';
+            if (task) {
+                req += '&task_name=' + task;
+            }
+            if (user) {
+                req += '&user=' + user;
+            }
+            if (group) {
+                req += '&group=' + group;
+            }
+            if (last_solution) {
+                req += '&last_solution=' + last_solution;
+            }
+            if (best_result) {
+                req += '&best_result=' + best_result;
+            }
+            window.location.href = 'http://192.168.1.8:8000/admin/solutions?block_id={{ block_id }}' + req;
+        }
+        function download() {
+            window.location.href = 'http://192.168.1.8:8000/admin/download?{{ req }}'
+        }
+    </script>
 </head>
 <body>
     <div>
@@ -23,14 +64,44 @@
     <h1 style="text-align: center;">
         <a href="http://192.168.1.8:8000/admin/block?block_id={{ block_id }}">Обратно к настройкам блока</a>
     </h1>
-    <h2>Посылки</h2>
+    <h2>Решения</h2>
     </div>
     <div>
+        <center>
         <table border="1px solid black">
             {% autoescape off %}
             {{ solutions }}
             {% endautoescape %}
         </table>
+        </center>
+        <button style="margin-top: 5px;" class="enter_simple" onclick="download()">Скачать решения</button>
+        <hr>
+    </div>
+    <div>
+        <h2>Фильтр</h2>
+        <table>
+            <tr>
+                <td>Таск</td>
+                <td><input type="text" placeholder="Таск" id="task_name" name="task_name" onchange="change()"></td>
+            </tr>
+            <tr>
+                <td>Пользователь</td>
+                <td><input type="text" placeholder="Пользователь" id="user" name="user" onchange="change()"></td>
+            </tr>
+            <tr>
+                <td>Группа</td>
+                <td><input type="text" placeholder="Группа" id="group" name="group" onchange="change()"></td>
+            </tr>
+            <tr>
+                <td>Последнее решение</td>
+                <td><input type="checkbox" id="last_solution" name="last_solution" onchange="change()"></td>
+            </tr>
+            <tr>
+                <td>Лучший результат</td>
+                <td><input type="checkbox" id="best_result" name="best_result" onchange="change()"></td>
+            </tr>
+        </table>
+        <button type="button" class="enter_simple" id="control" onclick="filter()">Сбросить</button>
     </div>
 </body>
 </html>

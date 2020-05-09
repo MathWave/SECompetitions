@@ -28,51 +28,17 @@
     </div>
     <div>
         <h3>
-            <table border="1px solid black">
-                <tr>
-                    <td>
-                        Блок:
-                    </td>
-                    <td>
-                        {{ block }}
-                    </td>
-                </tr>
-                <tr>
-                    <td>
-                        Таск:
-                    </td>
-                    <td>
-                        {{ task }}
-                    </td>
-                </tr>
-                <tr>
-                    <td>
-                        Студент:
-                    </td>
-                    <td>
-                        {{ username }}
-                    </td>
-                </tr>
-                <tr>
-                    <td>
-                        Id посылки:
-                    </td>
-                    <td>
-                        {{ id }}
-                    </td>
-                </tr>
-                <tr>
-                    <td>
-                        Вердикт:
-                    </td>
-                    <td>
-                        {{ verdict }}
-                    </td>
-                </tr>
-            </table>
+            <form method="POST">
+                {% csrf_token %}
+                <table border="1px solid black">
+                {% autoescape off %}
+                    {{ info_table }}
+                {% endautoescape %}
+                </table>
+            </form>
         </h3>
         <center>
-            <h1><a href="http://192.168.1.8:8000/admin/solution?solution_id={{ id }}&folder={{ folder }}">Обратно к файлам решения</a></h1>
+            <h1><a href="http://192.168.1.8:8000/admin/solution?solution_id={{ id }}&folder={{ folder }}{{ req }}">Обратно к файлам решения</a></h1>
         </center>
         <h2>{{ filename }}</h2>
         <h3>{{ file }}</h3>

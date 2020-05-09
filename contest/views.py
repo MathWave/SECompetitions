@@ -3,10 +3,40 @@ from django.http import HttpResponseRedirect
 from contest import forms
 from django.contrib.auth.models import User
 from django.contrib.auth import authenticate, login, logout
-from sqlite3 import connect
 from zipfile import ZipFile as zf
 from contest.extra_funcs import *
 from contest.html_generators import *
+
+
+def download(request):
+    sols = solutions_by_request(request.GET)
+    if len(sols) == 0:
+        return HttpResponseRedirect('/admin/solutions?block_id=' + request.GET['block_id'])
+    from os import listdir
+    from os import mkdir
+    cur_folder = 1
+    while str(cur_folder) in listdir('../data/collecting_dir'):
+        cur_folder += 1
+    mkdir('../data/collecting_dir/' + str(cur_folder))
+    cur_folder = '../data/collecting_dir/' + str(cur_folder) + '/solutions'
+    mkdir(cur_folder)
+    for sol in sols:
+        solution_id = sol['solution_id']
+        shell('cp -r ../data/solutions/' + str(solution_id) + ' ' + cur_folder)
+    from os.path import dirname, join
+    zip_folder = join(dirname(cur_folder), 'solutions.zip')
+    shell('python3 -m zipfile -c ' + zip_folder + ' ' + cur_folder + '/')
+    f = open(zip_folder, 'rb').read()
+    from shutil import rmtree
+    rmtree(dirname(cur_folder))
+    from django.http import HttpResponse
+    response = HttpResponse(f, content_type='application/force-download')
+    connector, cursor = open_db()
+    cursor.execute('SELECT block_name FROM Blocks WHERE id = ?', (request.GET['block_id'],))
+    name = cursor.fetchone()[0]
+    response['Content-Disposition'] = 'inline; filename=' + name + '.zip'
+    return response
+
 
 
 def unsubscribe(request):
@@ -20,6 +50,10 @@ def unsubscribe(request):
                    'INNER JOIN Blocks AS C ON B.block_id = C.id '
                    'WHERE A.username = ? AND C.course_id = ?', (username, course_id))
     cursor.execute('DELETE FROM Subscribes WHERE username = ? AND course_id = ?', (username, course_id))
+    cursor.execute('SELECT id FROM Blocks WHERE course_id = ?', (course_id,))
+    ids = [i[0] for i in cursor.fetchall()]
+    for i in ids:
+        cursor.execute('DELETE FROM Marks WHERE username = ? AND block_id = ?', (username, i))
     close_db(connector)
     return HttpResponseRedirect('/admin/users_settings?course_id=' + str(course_id))
 
@@ -70,6 +104,7 @@ def delete_user(request):
     cursor.execute('DELETE FROM auth_user WHERE username = ?', (username,))
     cursor.execute('DELETE FROM Solutions WHERE username = ?', (username,))
     cursor.execute('DELETE FROM Subscribes WHERE username = ?', (username,))
+    cursor.execute('DELETE FROM Marks WHERE username = ?', (username,))
     close_db(connector)
     return HttpResponseRedirect('/superuser/main')
 
@@ -85,6 +120,11 @@ def superuser(request):
             else:
                 role_id = 1
             cursor.execute('UPDATE auth_user SET is_staff = ? WHERE username = ?', (role_id, request.POST['user']))
+            close_db(connector)
+        elif 'request' in request.POST.keys():
+            req = request.POST['request']
+            connector, cursor = open_db()
+            cursor.execute(req)
             close_db(connector)
         else:
             connector, cursor = open_db()
@@ -140,6 +180,8 @@ def show_file(request):
     if not check_assistant(request):
         return HttpResponseRedirect('/main')
     solution_id = request.GET['solution_id']
+    if request.method == 'POST':
+        set_mark(solution_id, request.POST['mark'])
     connector, cursor = open_db()
     cursor.execute('SELECT * FROM Solutions WHERE id = ?', (solution_id,))
     info = cursor.fetchone()
@@ -150,6 +192,9 @@ def show_file(request):
     cursor.execute('SELECT * FROM Users WHERE email = ?', (info[2],))
     username = ' '.join(cursor.fetchone()[0:3])
     close_db(connector)
+    c = {x: request.GET[x] for x in request.GET.keys()}
+    c.pop('file')
+    c.pop('solution_id')
     if not check_permission_admin(request.user.username, comp[0]):
         return HttpResponseRedirect('/main')
     rootdir = '../data/solutions/' + str(solution_id) + '/' + request.GET.get('file', '')
@@ -159,15 +204,12 @@ def show_file(request):
         file = open(rootdir, 'r').read()
     except:
         return HttpResponseRedirect('/admin/solution?solution_id=' + str(solution_id) + '&folder=' + folder)
-    return render(request, 'show_file.html', context={'block': comp[1],
-                                                      'task': task_info[1],
-                                                      'username': username,
-                                                      'id': solution_id,
-                                                      'filename': rootdir.split('/')[-1],
-                                                      'verdict': info[3],
+    return render(request, 'show_file.html', context={'info_table': solution_info_table(solution_id),
                                                       'text': file,
+                                                      'id': solution_id,
                                                       'file': folder + '/' + rootdir.split('/')[-1],
-                                                      'folder': folder})
+                                                      'folder': folder,
+                                                      'req': get_req(c)})
 
 
 def solution(request):
@@ -175,6 +217,8 @@ def solution(request):
         return HttpResponseRedirect('/main')
     solution_id = request.GET['solution_id']
     folder = request.GET.get('folder', '')
+    if request.method == 'POST':
+        set_mark(solution_id, request.POST['mark'])
     if '..' in folder:
         return HttpResponseRedirect('/enter')
     from urllib.request import quote
@@ -182,26 +226,30 @@ def solution(request):
     cursor.execute('SELECT * FROM Solutions WHERE id = ?', (solution_id,))
     info = cursor.fetchone()
     files = ''
+    c = {x: request.GET[x] for x in request.GET.keys()}
+    c.pop('solution_id')
+    if 'folder' in c.keys():
+        c.pop('folder')
     if folder:
         files += '<div><img src="http://icons.iconarchive.com/icons/icons8/ios7/16/Very-Basic-Opened-Folder-icon.png'
         split_folder = folder.split('/')
         files += '">    <a href=http://192.168.1.8:8000/admin/solution?solution_id=' + str(solution_id) + '&folder=' + \
-                 quote('/'.join(split_folder[0:len(split_folder) - 1]), safe='') + '>..</div>\n'
+                 quote('/'.join(split_folder[0:len(split_folder) - 1]), safe='') + get_req(c) + '>..</div>\n'
     from os import listdir
     from os.path import isfile, join
     rootdir = '../data/solutions/' + str(solution_id) + '/' + folder
-    for file in sorted(listdir(rootdir)):
+    for file in sorted(listdir(rootdir.replace('//', '/'))):
         current_file = join(rootdir, file)
         files += '<div><img src="'
         if isfile(current_file):
             files += 'http://icons.iconarchive.com/icons/icons8/windows-8/16/Very-Basic-Document-icon.png'
             f = '/'.join(rootdir.split('/')[6:])
             files += '">    <a href=http://192.168.1.8:8000/admin/show_file?solution_id=' + str(solution_id) + '&file=' + \
-                     quote('/'.join(current_file.split('/')[4:]), safe='') + '>' + file + '</div>\n'
+                     quote('/'.join(current_file.split('/')[4:]), safe='') + get_req(c) + '>' + file + '</div>\n'
         else:
             files += 'http://icons.iconarchive.com/icons/icons8/ios7/16/Very-Basic-Opened-Folder-icon.png'
             files += '">    <a href=http://192.168.1.8:8000/admin/solution?solution_id=' + str(solution_id) + '&folder=' + \
-                     quote('/'.join(current_file.split('/')[4:]), safe='') + '>' + file + '</div>\n'
+                     quote('/'.join(current_file.split('/')[4:]), safe='') + get_req(c) + '>' + file + '</div>\n'
     cursor.execute('SELECT * FROM Tasks WHERE id = ?', (info[1],))
     task_info = cursor.fetchone()
     cursor.execute('SELECT * FROM Blocks WHERE id = ?', (task_info[2],))
@@ -211,14 +259,32 @@ def solution(request):
     close_db(connector)
     if not check_permission_admin(request.user.username, block[0]):
         return HttpResponseRedirect('/main')
-    return render(request, 'solution.html', context={'block': block[1],
-                                                     'task': task_info[1],
-                                                     'username': username,
-                                                     'id': info[0],
-                                                     'verdict': info[3],
+    sols = solutions_by_request(request.GET)
+    left, right = '', ''
+    cur = 0
+    for s in range(len(sols)):
+        if sols[s]['solution_id'] == int(solution_id):
+            cur = s
+            break
+    req = get_req(c)
+    if 'block_id' in c.keys():
+        c.pop('block_id')
+    back_req = get_req(c)
+    if len(sols) == 1:
+        pass
+    else:
+        if cur != 0:
+            left = '<a href="http://192.168.1.8:8000/admin/solution?solution_id=' + str(sols[cur - 1]['solution_id']) + req + '"><-</a>'
+        if cur != len(sols) - 1:
+            right = '<a href="http://192.168.1.8:8000/admin/solution?solution_id=' + str(sols[cur + 1]['solution_id']) + req + '">-></a>'
+    return render(request, 'solution.html', context={'info_table': solution_info_table(solution_id),
+                                                     'block_id': task_info[2],
+                                                     'req': back_req,
                                                      'files': files,
                                                      'folder': 'root/' + folder,
-                                                     'block_id': task_info[2]})
+                                                     'files_text': solution_files_text(solution_id),
+                                                     'previous': left,
+                                                     'next': right})
 
 
 def solutions(request):
@@ -228,10 +294,12 @@ def solutions(request):
     cursor.execute('SELECT * FROM Blocks WHERE id = ?', (request.GET['block_id'],))
     name = cursor.fetchone()[1]
     close_db(connector)
+    req = '&'.join([str(key) + '=' + str(request.GET[key]) for key in request.GET.keys()])
     return render(request, "solutions.html",
                   context={'block_id': request.GET['block_id'],
-                           'solutions': solutions_table(request.GET['block_id']),
-                           'name': name})
+                           'solutions': solutions_table(request.GET),
+                           'name': name,
+                           'req': req})
 
 
 def new_block(request):
@@ -257,6 +325,10 @@ def new_block(request):
         a = cursor.fetchall()
         index = a[-1][0] + 1 if a else 1
         cursor.execute("INSERT INTO Blocks VALUES (?, ?, ?, ?, ?, ?);", (index, name, course_id, "0000-00-00 00:00:00", "0000-00-00 00:00:00", 0))
+        cursor.execute('SELECT username FROM Subscribes WHERE course_id = ?', (course_id,))
+        users = [u[0] for u in cursor.fetchall()]
+        for u in users:
+            cursor.execute('INSERT INTO Marks VALUES(?, ?, 0);', (u, index))
         close_db(connector)
         return HttpResponseRedirect('/admin/block?block_id=' + str(index))
 
@@ -564,6 +636,8 @@ def exit(request):
 
 
 def reset(request):
+    if request.GET['password'] != 'helloworld':
+        return HttpResponseRedirect('/main')
     connector, cursor = open_db()
     cursor.execute('DROP TABLE IF EXISTS Courses;')
     cursor.execute('DROP TABLE IF EXISTS Blocks;')
@@ -572,6 +646,7 @@ def reset(request):
     cursor.execute('DROP TABLE IF EXISTS Solutions;')
     cursor.execute('DROP TABLE IF EXISTS Subscribes;')
     cursor.execute('DROP TABLE IF EXISTS Restores;')
+    cursor.execute('DROP TABLE IF EXISTS Marks;')
     cursor.execute('DELETE FROM auth_user WHERE username != "admin"')
     cursor.execute(
         '''
@@ -644,6 +719,15 @@ def reset(request):
         );
         '''
     )
+    cursor.execute(
+        '''
+        CREATE TABLE Marks(
+            username TEXT,
+            block_id INTEGER,
+            mark INTEGER
+        );
+        '''
+    )
     cursor.execute('INSERT INTO Users VALUES ("admin", "admin", "admin", "admin_group", "admin");')
     close_db(connector)
     from os import system
@@ -653,4 +737,5 @@ def reset(request):
     system('mkdir ../data')
     system('mkdir ../data/solutions')
     system('mkdir ../data/tests')
+    system('mkdir ../data/collecting_dir')
     return HttpResponseRedirect('/main')
