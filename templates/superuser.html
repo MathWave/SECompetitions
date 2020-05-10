@@ -12,11 +12,11 @@
         <script type="text/javascript">
             function delete_user(username) {
                 let del = confirm("Точно удаляем?");
-                if (del) window.location.href = 'http://mathwave.pythonanywhere.com/delete_user?user=' + username
+                if (del) window.location.href = 'http://192.168.1.8:8000/delete_user?user=' + username
             }
             function delete_course(course_id) {
                 let del = confirm("Точно удаляем?");
-                if (del) window.location.href = 'http://mathwave.pythonanywhere.com/delete_course?course_id=' + course_id
+                if (del) window.location.href = 'http://192.168.1.8:8000/delete_course?course_id=' + course_id
             }
         </script>
         <style  type="text/css">
@@ -76,6 +76,7 @@
         <div>
             <h1>Доступ к базе данных</h1>
             <form method="POST">
+                {% csrf_token %}
                 <input type="text" name="request">
                 <input type="submit" value="Запрос">
             </form>

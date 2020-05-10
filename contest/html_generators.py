@@ -151,7 +151,7 @@ def admin_blocks_table(request):
         line += '<h2>' + course[1] + '</h2>\n'
         line += '<table>'
         for block in showable[course]:
-            line += '<tr><td><a href="http://mathwave.pythonanywhere.com/admin/block?block_id=' + str(block[0]) + '">' + block[1] + '</td></tr>\n'
+            line += '<tr><td><a href="http://192.168.1.8:8000/admin/block?block_id=' + str(block[0]) + '">' + block[1] + '</td></tr>\n'
         line += '</table>\n'
         if check_teacher(request):
             line += '<input type="submit" class="enter_simple" onclick="new_block(' + str(course[0]) + ')" value="Создать новый Блок">\n'
@@ -167,18 +167,18 @@ def admin_tasks_table(block_id):
     close_db(connector)
     line = '<table>\n'
     for c in tasks:
-        line += '<tr><td><a href="http://mathwave.pythonanywhere.com/admin/task?task_id=' + str(c[0]) + '">' + c[1] + '</td></tr>\n'
+        line += '<tr><td><a href="http://192.168.1.8:8000/admin/task?task_id=' + str(c[0]) + '">' + c[1] + '</td></tr>\n'
     line += '</table>'
     return line
 
 
 # решения для данного блока
 def solutions_table(get_request):
-    solution_list = solutions_by_request(get_request)
+    solution_list = solutions_by_request({key: get_request[key][0] for key in get_request.keys()})
     table = '<tr><td><b>Id</b></td><td><b>Таск</b></td><td><b>Пользователь</b></td><td><b>Группа</b></td><td><b>Результат</b></td><td><b>Оценка</b></td></tr>'
     for solution in reversed(solution_list):
         table += '<tr>\n'
-        table += "<td><a href='http://mathwave.pythonanywhere.com/admin/solution?solution_id=" + str(solution['solution_id']) +\
+        table += "<td><a href='http://192.168.1.8:8000/admin/solution?solution_id=" + str(solution['solution_id']) +\
                  get_req(get_request) + "'>" + str(solution['solution_id']) + '</a></td>'
         table += '<td>' + str(solution['task_name']) + '</td>\n'
         table += '<td>' + solution['user'] + '</td>'
@@ -200,8 +200,9 @@ def blocks_table(request):
         line += '<h2>' + course[1] + '</h2>\n'
         line += '<table>'
         for block in showable[course]:
-            line += '<tr><td><a href="http://mathwave.pythonanywhere.com/block?block_id=' + str(block[0]) + '">' + \
-                    block[1] + '</td><td><div style="border:thin solid black;padding:3px;">' + str(marks[block[0]]) + '</tr>\n'
+            line += '<tr><td><a href="http://192.168.1.8:8000/block?block_id=' + str(block[0]) + '">' + block[1] + \
+                    '</td><td>' + ('<div style="border:thin solid black;padding:3px;">' +
+                                   str(marks[block[0]]) if block[0] in marks.keys() else '') + '</td></tr>\n'
         line += '</table>\n'
     return line
 
@@ -213,7 +214,7 @@ def tasks_table(block_id):
     tasks = cursor.fetchall()
     line = '<table>\n'
     for c in tasks:
-        line += '<tr><td><a href="http://mathwave.pythonanywhere.com/task?task_id=' + str(c[0]) + '">' + c[1] + \
+        line += '<tr><td><a href="http://192.168.1.8:8000/task?task_id=' + str(c[0]) + '">' + c[1] + \
                 '</td></tr>\n'
     line += '</table>'
     return line

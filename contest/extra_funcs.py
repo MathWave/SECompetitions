@@ -84,6 +84,8 @@ def check_subscription_block(username, block_id):
 
 def check_permission_admin(username, block_id):
     user = User.objects.get(username=username)
+    if not user:
+        return False
     if user.is_superuser:
         return True
     if not check_subscription_block(username, block_id):
@@ -200,10 +202,14 @@ def available_blocks(username, role):
     connector, cursor = open_db()
     showable = {}
     cursor.execute('SELECT * FROM Courses '
-                   'INNER JOIN Subscribes ON Subscribes.course_id = Courses.id WHERE username = ?', (username,))
+                   'INNER JOIN Subscribes ON Subscribes.course_id = Courses.id '
+                   'WHERE username = ?', (username,))
     for node in cursor.fetchall():
         showable[(node[0], node[1])] = []
-    cursor.execute('SELECT * FROM Blocks INNER JOIN Courses ON Courses.id = Blocks.course_id')
+    cursor.execute('SELECT Blocks.id, Blocks.block_name, Courses.id, Courses.course_name FROM Blocks '
+                   'INNER JOIN Courses ON Courses.id = Blocks.course_id '
+                   'INNER JOIN Subscribes ON Subscribes.course_id = Courses.id '
+                   'WHERE username = ?', (username,))
     l = cursor.fetchall()
     close_db(connector)
     for node in l:
@@ -247,7 +253,7 @@ def solutions_by_request(request):
         'INNER JOIN Users AS C ON A.username = C.email '
         'INNER JOIN Marks AS D ON D.username = A.username '
         'AND D.block_id = B.block_id '
-        'WHERE B.block_id = ?', (request['block_id'],)
+        'WHERE B.block_id = ?', (int(request['block_id']),)
     )
     solutions = cursor.fetchall()
     allowed = ['user', 'task_name', 'group']
@@ -304,3 +310,12 @@ def get_files(path):
 
 def get_req(request):
     return ('&' + '&'.join(str(x) + '=' + str(request[x]) for x in request.keys())) if request else ''
+
+
+def is_integer(line):
+    ret = True
+    try:
+        int(line)
+    except:
+        ret = False
+    return ret
